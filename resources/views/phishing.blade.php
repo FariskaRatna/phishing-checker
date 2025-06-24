@@ -121,7 +121,8 @@
                 resDiv.innerHTML = `
                     <div class="alert ${data.prediction === 'phishing' ? 'alert-danger' : 'alert-success'}">
                         <strong>Prediction:</strong> ${data.prediction}<br>
-                        <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%
+                        <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%<br>
+                        <strong>LLM Insight:</strong><br><pre>${data.llm_analysis}</pre>
                     </div>
                 `;
             } catch (err) {

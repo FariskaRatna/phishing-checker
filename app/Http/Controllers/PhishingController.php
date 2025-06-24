@@ -31,7 +31,7 @@ class PhishingController extends Controller
 
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
 
-        Phishing::create([
+        $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
@@ -39,12 +39,38 @@ class PhishingController extends Controller
             'nameservers' => $data['nameservers'] ?? [],
             'features' => $data['features'] ?? [],
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
-            // 'forms' => json_encode($data['extracted_content']['forms'] ?? []),
-            // 'heads' => json_encode($data['extracted_content']['heads'] ?? []),
-            // 'titles' => json_encode($data['extracted_content']['titles'] ?? []),
-            // 'scripts' => json_encode($data['extracted_content']['scripts'] ?? []),
-        ]);
+        ]); // Removed json_encode here
 
-        return response()->json($data);
+        $llmResponse = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'), // Use .env variable
+            'HTTP-Referer' => config('app.url'), // Use app.url config
+            'X-Title' => 'Phishing Content Analysis'
+        ])->post('https://openrouter.ai/api/v1/chat/completions', [
+            'model' => 'mistralai/mistral-small-3.2-24b-instruct:free',
+            'messages' => [
+                 [
+                    'role' => 'system',
+                    'content' => 'You are a helpful assistant specialized in detecting phishing content. Please respond briefly and concisely.'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "Berikut ini adalah hasil ekstraksi konten dari sebuah halaman web:\n\n" . 
+                                json_encode($data['extracted_content'] ?? [], JSON_PRETTY_PRINT) . 
+                                "\n\nApa indikasi bahwa halaman ini phishing? Jawab maksimal 5 poin singkat saja."
+                ]
+            ]
+        ])->throw(); 
+        $llmData = $llmResponse->json()['choices'][0]['message']['content'] ?? null;
+
+        $phishing->save();
+
+        $phishing->update(['llm_analysis' => $llmData]); // Store the LLM analysis to database
+
+
+        return response()->json([
+            'prediction' => $phishing->prediction,
+            'confidence' => $phishing->confidence,
+            'llm_analysis' => $llmData // Return LLM response to client
+        ]);
     }
 }

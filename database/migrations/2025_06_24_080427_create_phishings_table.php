@@ -20,6 +20,7 @@ return new class extends Migration
             $table->json('nameservers')->nullable();
             $table->json('features')->nullable();
             $table->longText('extracted_content')->nullable();
+            $table->longText('llm_analysis')->nullable();
             // $table->longText('forms')->nullable();
             // $table->longText('heads')->nullable();
             // $table->longText('titles')->nullable();
