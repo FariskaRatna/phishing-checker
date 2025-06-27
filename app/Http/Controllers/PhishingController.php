@@ -5,14 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Phishing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-// use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Storage;
+use Throwable;
+use Illuminate\Support\Facades\Log;
 
 class PhishingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return view('phishing');
@@ -25,12 +23,35 @@ class PhishingController extends Controller
         ]);
 
         $url = $request->input('url');
-        $response = Http::post('http://localhost:5000/predict', ['url' => $url]);
 
-        $data = $response->json();
+        try {
+            // Kirim request POST ke Flask API untuk analisis phishing
+            $response = Http::timeout(30)->post('http://localhost:5000/predict', ['url' => $url]);
 
-        // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
+            if ($response->failed()) {
+                // This handles 4xx and 5xx responses from the Flask API
+                Log::error('Phishing API returned a failed status.', ['status' => $response->status(), 'body' => $response->body()]);
+                return response()->json(['error' => 'Layanan analisis phishing mengembalikan error.'], 500);
+            }
 
+            // Try to decode the JSON response. This can fail if the body is not valid JSON.
+            $data = $response->json();
+
+            if (is_null($data)) {
+                throw new \Exception('Failed to decode JSON from Phishing API. Body: ' . $response->body());
+            }
+
+            // Log the successful response
+            Log::info('Phishing API Response:', ['status' => $response->status(), 'body' => $data]);
+        } catch (Throwable $e) {
+            // This handles connection errors and JSON decoding errors
+            Log::error('Gagal berkomunikasi dengan layanan analisis phishing: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal berkomunikasi dengan layanan analisis phishing.'], 500);
+        }
+
+        Storage::put('debug_extracted.json',json_encode($data['extracted_content']));
+
+        // Simpan hasil analisis phishing ke database
         $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
             'prediction' => $data['prediction'] ?? '',
@@ -39,39 +60,39 @@ class PhishingController extends Controller
             'nameservers' => $data['nameservers'] ?? [],
             'features' => $data['features'] ?? [],
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
-        ]); // Removed json_encode here
+        ]);
+        
+        $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
 
-        // $llmResponse = Http::withHeaders([
-        //     'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'), // Use .env variable
-        //     'HTTP-Referer' => config('app.url'), // Use app.url config
-        //     'X-Title' => 'Phishing Content Analysis'
-        // ])->post('https://openrouter.ai/api/v1/chat/completions', [
-        //     'model' => 'mistralai/mistral-small-3.2-24b-instruct:free',
-        //     'messages' => [
-        //          [
-        //             'role' => 'system',
-        //             'content' => 'You are a helpful assistant specialized in detecting phishing content. Please respond briefly and concisely.'
-        //         ],
-        //         [
-        //             'role' => 'user',
-        //             'content' => "Berikut ini adalah hasil ekstraksi konten dari sebuah halaman web:\n\n" . 
-        //                         json_encode($data['extracted_content'] ?? [], JSON_PRETTY_PRINT) . 
-        //                         "\n\nApa indikasi bahwa halaman ini phishing? Jawab maksimal 5 poin singkat saja."
-        //         ]
-        //     ]
-        // ])->throw(); 
-        // $llmData = $llmResponse->json()['choices'][0]['message']['content'] ?? null;
+        try {
+            // Kirim konten ke Flask untuk analisis LLM
+            $llmResponse = Http::timeout(60)->get('http://localhost:5002/llm-analyze/' . $phishing->id);
 
-        // $phishing->save();
+            // Log respons dari LLM API untuk debugging
+            Log::info('LLM API Response:', [
+                'status' => $llmResponse->status(),
+                'body' => $llmResponse->json()
+            ]);
 
-        // $phishing->update(['llm_analysis' => $llmData]); // Store the LLM analysis to database
+            // Ambil data LLM hanya jika request berhasil
+            if ($llmResponse->successful()) {
+                $llmData = $llmResponse->json();
+                $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan insight dari respons LLM.';
+            }
+        } catch (Throwable $e) {
+            // Tangkap error koneksi atau lainnya dan catat di log
+            Log::error('Gagal saat menghubungi LLM service: ' . $e->getMessage());
+            
+        }
 
+        $data['llm_analysis'] = $llmAnalysis;
 
-        // return response()->json([
-        //     'prediction' => $phishing->prediction,
-        //     'confidence' => $phishing->confidence,
-        //     'llm_analysis' => $llmData // Return LLM response to client
-        // ]);
+        // Simpan hasil gabungan analisis ke database
+        $phishing->update([
+            'llm_analysis' => $llmAnalysis
+        ]);
+
+        // Kirimkan hasil analisis kembali ke frontend
         return response()->json($data);
     }
 }
