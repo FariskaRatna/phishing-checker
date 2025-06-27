@@ -11,7 +11,9 @@ Route::post('/phishing/check', [PhishingController::class, 'check']);
 
 
 
-
+Route::get('/homr', function () {
+    return view('welcome');
+});
 
 
 
