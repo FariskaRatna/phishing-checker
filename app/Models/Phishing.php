@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Phishing extends Model
 {
     protected $fillable = [
-        'url', 'prediction', 'confidence', 'phishing_probability', 'nameservers', 'features',
+        'url', 'prediction', 'confidence', 'phishing_probability', 'nameservers', 'domain', 'features',
         'extracted_content', 'llm_analysis'
     ];
 

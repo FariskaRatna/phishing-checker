@@ -37,6 +37,7 @@ class PhishingController extends Controller
             'confidence' => $data['confidence'] ?? 0,
             'phishing_probability' => $data['phishing_probability'] ?? 0,
             'nameservers' => $data['nameservers'] ?? [],
+            'domain' => $data['domain'] ?? [],
             'features' => $data['features'] ?? [],
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
         ]); // Removed json_encode here
@@ -60,6 +61,7 @@ class PhishingController extends Controller
                 ]
             ]
         ])->throw(); 
+        dd($llmResponse->json());
         $llmData = $llmResponse->json()['choices'][0]['message']['content'] ?? null;
 
         $phishing->save();
@@ -67,10 +69,12 @@ class PhishingController extends Controller
         $phishing->update(['llm_analysis' => $llmData]); // Store the LLM analysis to database
 
 
-        return response()->json([
-            'prediction' => $phishing->prediction,
-            'confidence' => $phishing->confidence,
-            'llm_analysis' => $llmData // Return LLM response to client
-        ]);
+        // return response()->json([
+        //     'prediction' => $phishing->prediction,
+        //     'confidence' => $phishing->confidence,
+        //     'llm_analysis' => $llmData // Return LLM response to client
+        // ]);
+
+        return response()->json($data);
     }
 }
