@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/phishing', [PhishingController::class, 'index']);
 Route::post('/phishing/check', [PhishingController::class, 'check']);
 
+Route::get('/phishing', [PhishingController::class, 'index']);
 
 
 Route::get('/home', function () {
@@ -17,9 +18,9 @@ Route::get('/home', function () {
 
 //Perbatasan 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
