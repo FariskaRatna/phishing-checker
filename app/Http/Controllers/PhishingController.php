@@ -120,20 +120,24 @@ class PhishingController extends Controller
             return $domain && str_ends_with($domain, $trusted);
         });
 
-        $originalConfidence = $data['confidence'] ?? 0;
-        $adjustedConfidence = $originalConfidence;
-        $finalPrediction = $data['prediction'] ?? 'phishing';
+        $prediction = $data['prediction'] ?? 'phishing';
+        $confidence = $data['confidence'] ?? 0;
+        $adjustedConfidence = $confidence;
 
-        if ($isTrusted) {
-            // Misalnya: kalau domain terpercaya, turunkan confidence phishing
-            $adjustedConfidence = max(0, $originalConfidence - 0.3);
-            $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legit';
-        } else {
-            // Domain tidak terpercaya → tambahkan bobot curiga
-            $adjustedConfidence = min(1, $originalConfidence + 0.1);
-            $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legit';
+        if ($prediction === 'phishing' && $isTrusted) {
+            $adjustedConfidence = max(0, $confidence - 0.3);
+        } 
+        // Jika model bilang ini legit tapi domain tidak trusted → kurangi sedikit confidence legit
+        elseif ($prediction === 'legitimate' && !$isTrusted) {
+            $adjustedConfidence = max(0, $confidence - 0.1);
         }
 
+        // Lalu prediksi akhirnya tetap mengacu ke label & confidence
+        $finalPrediction = $prediction;
+        if ($adjustedConfidence < 0.5) {
+            // Jika confidence rendah, kita bisa kasih warning
+            $finalPrediction .= '_low_confidence';
+        }
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
 
         Phishing::create([
