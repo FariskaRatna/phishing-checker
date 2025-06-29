@@ -16,15 +16,15 @@ return new class extends Migration
             $table->string('url');
             $table->string('prediction');
             $table->float('confidence');
+            $table->string('domain');
             $table->float('phishing_probability');
             $table->json('nameservers')->nullable();
             $table->json('features')->nullable();
             $table->longText('extracted_content')->nullable();
+            $table->float('adjusted_confidence')->nullable();
+            $table->string('final_prediction')->nullable();
+            $table->boolean('trusted_domain')->nullable();
             $table->longText('llm_analysis')->nullable();
-            // $table->longText('forms')->nullable();
-            // $table->longText('heads')->nullable();
-            // $table->longText('titles')->nullable();
-            // $table->longText('scripts')->nullable();
             $table->timestamps();
         });
     }
