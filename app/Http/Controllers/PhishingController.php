@@ -10,6 +10,7 @@ use Throwable;
 use Illuminate\Support\Facades\Log;
 use Jenssegers\Agent\Agent;
 
+
 class PhishingController extends Controller
 {
     public function index(Request $request)
@@ -35,85 +36,150 @@ class PhishingController extends Controller
         ]);
     }
 
+    // public function index()
+    // {
+    //     return view('phishing');
+    // }
+
     public function check(Request $request)
     {
-
-
         $request->validate([
-            'url' => 'required|url'
+            'url' => 'required|string'
         ]);
 
         $url = $request->input('url');
-
+        
+        // Normalize the URL - add https:// if no protocol is specified
+        if (!preg_match('/^https?:\/\//', $url)) {
+            $url = 'https://' . $url;
+        }
+        
+        // Validate the normalized URL
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return response()->json(['error' => 'Invalid URL format'], 400);
+        }
+        
         try {
-            // Kirim request POST ke Flask API untuk analisis phishing
+            // Log the request
+            Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
+            
             $response = Http::timeout(30)->post('http://localhost:5000/predict', ['url' => $url]);
+            
+            // Log the raw response for debugging
+            Log::info('Flask API Response', [
+                'status' => $response->status(),
+                'headers' => $response->headers(),
+                'body_preview' => substr($response->body(), 0, 500)
+            ]);
 
+            // Check if response failed
             if ($response->failed()) {
-                // This handles 4xx and 5xx responses from the Flask API
-                Log::error('Phishing API returned a failed status.', ['status' => $response->status(), 'body' => $response->body()]);
-                return response()->json(['error' => 'Layanan analisis phishing mengembalikan error.'], 500);
+                Log::error('Flask API failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return response()->json(['error' => 'Flask API returned error: ' . $response->status()], 500);
             }
 
-            // Try to decode the JSON response. This can fail if the body is not valid JSON.
+            // Check content type
+            $contentType = $response->header('Content-Type');
+            if (!$contentType || !str_contains($contentType, 'application/json')) {
+                Log::error('Flask API returned non-JSON', [
+                    'content_type' => $contentType,
+                    'body' => $response->body()
+                ]);
+                return response()->json(['error' => 'Flask API returned non-JSON response'], 500);
+            }
+
             $data = $response->json();
-
+            
             if (is_null($data)) {
-                throw new \Exception('Failed to decode JSON from Phishing API. Body: ' . $response->body());
+                Log::error('Failed to parse JSON from Flask API', [
+                    'body' => $response->body(),
+                    'json_error' => json_last_error_msg()
+                ]);
+                return response()->json(['error' => 'Invalid JSON response from Flask API'], 500);
             }
 
-            // Log the successful response
-            Log::info('Phishing API Response:', ['status' => $response->status(), 'body' => $data]);
-        } catch (Throwable $e) {
-            // This handles connection errors and JSON decoding errors
-            Log::error('Gagal berkomunikasi dengan layanan analisis phishing: ' . $e->getMessage());
-            return response()->json(['error' => 'Gagal berkomunikasi dengan layanan analisis phishing.'], 500);
+            // Log successful response
+            Log::info('Flask API success', ['data' => $data]);
+
+        } catch (\Exception $e) {
+            Log::error('Exception calling Flask API', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Failed to connect to Flask API: ' . $e->getMessage()], 500);
         }
 
-        Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
+        $trustedDomains = json_decode(file_get_contents(storage_path('app/trusted_domain.json')), true);
 
-        // Simpan hasil analisis phishing ke database
-        $phishing = Phishing::create([
+        $domain = $data['domain'] ?? null;
+
+        $isTrusted = collect($trustedDomains)->contains(function ($trusted) use ($domain) {
+            return $domain && str_ends_with($domain, $trusted);
+        });
+
+        $originalConfidence = $data['confidence'] ?? 0;
+        $adjustedConfidence = $originalConfidence;
+        $finalPrediction = $data['prediction'] ?? 'phishing';
+
+        if ($isTrusted) {
+            // Misalnya: kalau domain terpercaya, turunkan confidence phishing
+            $adjustedConfidence = max(0, $originalConfidence - 0.3);
+            $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legit';
+        } else {
+            // Domain tidak terpercaya → tambahkan bobot curiga
+            $adjustedConfidence = min(1, $originalConfidence + 0.1);
+            $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legit';
+        }
+
+        // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
+
+        Phishing::create([
             'url' => $data['url'] ?? $url,
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
+            'domain' => $data['domain'] ?? [],
             'phishing_probability' => $data['phishing_probability'] ?? 0,
             'nameservers' => $data['nameservers'] ?? [],
             'features' => $data['features'] ?? [],
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
+            'adjusted_confidence' => $adjustedConfidence,
+            'final_prediction' => $finalPrediction,
+            'trusted_domain' => $isTrusted,
         ]);
 
-        $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
+        // $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
 
-        try {
-            // Kirim konten ke Flask untuk analisis LLM
-            $llmResponse = Http::timeout(60)->get('http://localhost:5002/llm-analyze/' . $phishing->id);
+        // try {
+        //     // Kirim konten ke Flask untuk analisis LLM
+        //     $llmResponse = Http::timeout(60)->get('http://localhost:5002/llm-analyze/' . $phishing->id);
 
-            // Log respons dari LLM API untuk debugging
-            Log::info('LLM API Response:', [
-                'status' => $llmResponse->status(),
-                'body' => $llmResponse->json()
-            ]);
+        //     // Log respons dari LLM API untuk debugging
+        //     Log::info('LLM API Response:', [
+        //         'status' => $llmResponse->status(),
+        //         'body' => $llmResponse->json()
+        //     ]);
 
-            // Ambil data LLM hanya jika request berhasil
-            if ($llmResponse->successful()) {
-                $llmData = $llmResponse->json();
-                $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan insight dari respons LLM.';
-            }
-        } catch (Throwable $e) {
-            // Tangkap error koneksi atau lainnya dan catat di log
-            Log::error('Gagal saat menghubungi LLM service: ' . $e->getMessage());
+        //     // Ambil data LLM hanya jika request berhasil
+        //     if ($llmResponse->successful()) {
+        //         $llmData = $llmResponse->json();
+        //         $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan insight dari respons LLM.';
+        //     }
+        // } catch (Throwable $e) {
+        //     // Tangkap error koneksi atau lainnya dan catat di log
+        //     Log::error('Gagal saat menghubungi LLM service: ' . $e->getMessage());
 
-        }
+        // }
 
-        $data['llm_analysis'] = $llmAnalysis;
+        // $data['llm_analysis'] = $llmAnalysis;
 
-        // Simpan hasil gabungan analisis ke database
-        $phishing->update([
-            'llm_analysis' => $llmAnalysis
-        ]);
+        // // Simpan hasil gabungan analisis ke database
+        // $phishing->update([
+        //     'llm_analysis' => $llmAnalysis
+        // ]);
 
-        // Kirimkan hasil analisis kembali ke frontend
         return response()->json($data);
     }
 }
