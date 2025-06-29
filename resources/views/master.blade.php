@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Phishing URL Checker - Skysnag</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Phishing URL Checker - BUMATARA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .hero {
@@ -91,7 +92,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm position-fixed top-0 start-0 w-100 z-3">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">SKYSNAG</a>
+            <a class="navbar-brand fw-bold" href="#">BUMATARA</a>
 
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -107,7 +108,7 @@
 
                             <div class="row">
                                 <div class="col-md-4 border-end">
-                                    <h5 class="fw-bold">Skysnag's Solutions</h5>
+                                    <h5 class="fw-bold">BUMATARA's Solutions</h5>
                                     <p class="text-muted">Industry tailored email authentication, deliverability, and
                                         brand identity solutions.</p>
                                     <a href="#" class="fw-semibold text-decoration-none">About us</a>
@@ -206,7 +207,7 @@
     <div class="container">
         <div class="row text-center text-md-start">
             <div class="col-md-2 mb-3">
-                <img src="https://skysnag.com/logo.svg" alt="Skysnag" height="30"><br>
+                <img src="https://BUMATARA.com/logo.svg" alt="BUMATARA" height="30"><br>
                 <a href="#" class="d-block mt-2 footer-links">LinkedIn</a>
                 <a href="#" class="d-block footer-links">Contact Us</a>
             </div>
@@ -221,7 +222,7 @@
                 <a href="#">GDPR</a>
             </div>
             <div class="col-md-2 mb-3 footer-links">
-                <h6>Skysnag</h6>
+                <h6>BUMATARA</h6>
                 <a href="#">Pricing</a><br>
                 <a href="#">Partners</a><br>
                 <a href="#">Contact</a>
@@ -246,13 +247,14 @@
             </div>
         </div>
         <div class="text-center mt-4">
-            <small>San Francisco, California — Copyright © 2025 Skysnag, Inc.</small>
+            <small>San Francisco, California — Copyright © 2025 BUMATARA, Inc.</small>
         </div>
     </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+@stack('scripts')
 
 
 </html>

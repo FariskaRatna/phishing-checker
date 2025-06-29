@@ -8,13 +8,23 @@
         <h1 class="display-5 fw-bold">Phishing URL checker</h1>
         <p class="lead mb-4">Our phishing URL checker detects if a URL is malicious or contains a phishing link.</p>
         <div class="url-checker-box">
-
+            <div class="text-end">
+                <p class="text-muted" style=" text-align: right;  color: black;">Quota Check : 2</p>
+            </div>
             <p class="text-muted mt-2 text-center">Detect if a URL has a phishing link or is malicious.</p>
             <form class="d-flex" id="singleForm">
                 <input type="text" name="url" id="url" class="form-control me-2" placeholder="example.com">
                 <button class="btn btn-primary" type="submit">Scan</button>
             </form>
             <div id="singleResult" class="result"></div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resultModal">
+                Modal
+            </button>
+
+            <!-- Modal -->
+
+
+
 
         </div>
     </section>
@@ -28,6 +38,7 @@
                 <div class="accordion mt-3" id="phishingFAQ">
                     <div class="accordion mt-3" id="phishingFAQ">
                         <div class="accordion-item">
+
                             <h2 class="accordion-header" id="q1">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#a1" aria-expanded="false" aria-controls="a1">
@@ -181,8 +192,9 @@
                 <h4 class="fw-bold">Riwayat URL Hari Ini</h4>
                 <div style="position: relative; width: 220px; height: 220px; margin: auto;">
                     <canvas id="overallChart" width="220" height="220"></canvas>
-                    <div id="chartCenterText" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                                                            font-weight: 600; font-size: 20px; color: #212529;">
+                    <div id="chartCenterText"
+                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                                                                                                                                        font-weight: 600; font-size: 20px; color: #212529;">
                         120 URL
                     </div>
                 </div>
@@ -282,40 +294,37 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">Hasil Analisis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" id="modalResultContent">
+                    <!-- Konten akan diisi oleh JavaScript -->
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
-@section('footer-panel')
+@push('scripts')
+    <script src="/java.js"></script>
+
     <script>
-        document.getElementById('singleForm').onsubmit = async function (e) {
-            e.preventDefault();
-            let url = document.getElementById('url').value;
-            let resDiv = document.getElementById('singleResult');
-            resDiv.textContent = 'Checking...';
+        console.log('Ini dari halaman Home');
+    </script>
+@endpush
+@section('footer-panel')
 
-            try {
-                let response = await fetch('/phishing/check', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ url })
-                });
-
-                if (!response.ok) throw new Error('Server error');
-
-                let data = await response.json();
-
-                resDiv.innerHTML = `
-                    <div class="alert ${data.prediction === 'phishing' ? 'alert-danger' : 'alert-success'}">
-                        <strong>Prediction:</strong> ${data.prediction}<br>
-                        <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%<br>
-                        <strong>LLM Insight:</strong><br><pre>${data.llm_analysis}</pre>
-                    </div>
-                `;
-            } catch (err) {
-                resDiv.innerHTML = `<div class="alert alert-warning">Error: ${err.message}</div>`;
-            }
-        };
-</script>
 @endsection

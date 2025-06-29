@@ -15,9 +15,6 @@ Route::get('/home', function () {
     return view('main.home');
 });
 
-
-
-
 //Perbatasan 
 
 Route::get('/', function () {

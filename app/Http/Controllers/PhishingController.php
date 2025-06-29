@@ -8,16 +8,37 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Illuminate\Support\Facades\Log;
+use Jenssegers\Agent\Agent;
 
 class PhishingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('phishing');
+        $agent = new Agent();
+        $ip = $request->ip();
+
+        // Lokasi IP
+        $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
+        $details = @json_decode($response);
+
+
+        return view('phishing', [
+            'ip' => $ip,
+            'city' => $details->city ?? 'Unknown',
+            'region' => $details->region ?? 'Unknown',
+            'country' => $details->country ?? 'Unknown',
+            'location' => $details->loc ?? 'Unknown',
+            'device' => $agent->device(),
+            'platform' => $agent->platform() . ' ' . $agent->version($agent->platform()),
+            'browser' => $agent->browser() . ' ' . $agent->version($agent->browser()),
+            'user_agent' => $request->header('User-Agent')
+        ]);
     }
 
     public function check(Request $request)
     {
+
+
         $request->validate([
             'url' => 'required|url'
         ]);
@@ -49,7 +70,7 @@ class PhishingController extends Controller
             return response()->json(['error' => 'Gagal berkomunikasi dengan layanan analisis phishing.'], 500);
         }
 
-        Storage::put('debug_extracted.json',json_encode($data['extracted_content']));
+        Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
 
         // Simpan hasil analisis phishing ke database
         $phishing = Phishing::create([
@@ -61,7 +82,7 @@ class PhishingController extends Controller
             'features' => $data['features'] ?? [],
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
         ]);
-        
+
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
 
         try {
@@ -82,7 +103,7 @@ class PhishingController extends Controller
         } catch (Throwable $e) {
             // Tangkap error koneksi atau lainnya dan catat di log
             Log::error('Gagal saat menghubungi LLM service: ' . $e->getMessage());
-            
+
         }
 
         $data['llm_analysis'] = $llmAnalysis;

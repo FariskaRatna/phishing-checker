@@ -94,42 +94,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 //Bagian Result Respons
-// document.getElementById('singleForm').onsubmit = async function (e) {
-//     e.preventDefault();
+function formatLlmAnalysis(text) {
+    if (!text) {
+        return 'Analisis tidak tersedia.';
+    }
+    // 1. Replace markdown-style bold (**text**) with <strong> tags
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // 2. Replace newlines with <br> tags for proper HTML line breaks
+    formattedText = formattedText.replace(/\n/g, '<br>');
+    return formattedText;
+}
 
+document.getElementById('singleForm').onsubmit = async function (e) {
+    e.preventDefault();
+    let url = document.getElementById('url').value;
 
-//     dispatchEvent;
-//     let url = document.getElementById('url').value;
-//     let resDiv = document.getElementById('singleResult');
-//     console.log('Sudaah masuk : ' + url);
-//     resDiv.textContent = 'Checking...';
+    console.log('Form submitted with URL:', url);
 
+    // 👉 Tampilkan modal dengan pesan "Checking..." sebelum request
+    document.getElementById('modalResultContent').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Checking...</p>
+        </div>
+    `;
+    const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+    resultModal.show();
 
-//     try {
-//         let response = await fetch('/phishing/check', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-//             },
-//             body: JSON.stringify({ url })
-//         });
+    try {
+        let response = await fetch('/phishing/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ url })
+        });
 
-//         if (!response.ok) throw new Error('Server error');
-//         console.log('${err.message}');
+        console.log('Response status:', response.status, response.statusText);
 
-//         let data = await response.json();
+        if (!response.ok) {
+            let errorText = `Server error: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                console.log('Error response JSON:', errorData);
+                if (errorData.error) {
+                    errorText = errorData.error;
+                }
+            } catch (e) {
+                console.warn('Error parsing JSON from error response:', e);
+            }
+            throw new Error(errorText);
+        }
 
-//         resDiv.innerHTML = `
-//                     <div class="alert ${data.prediction === 'phishing' ? 'alert-danger' : 'alert-success'}">
-//                         <strong>Prediction:</strong> ${data.prediction}<br>
-//                         <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%<br>
-//                         <strong>LLM Insight:</strong><br><pre>${data.llm_analysis}</pre>
-//                     </div>
-//                 `;
-//     } catch (err) {
-//         resDiv.innerHTML = `<div class="alert alert-warning">Error: ${err.message}</div>`;
-//     }
-// };
+        let data = await response.json();
+        console.log('Response JSON data:', data);
+
+        let llmHtml = formatLlmAnalysis(data.llm_analysis);
+        console.log('Formatted LLM Analysis HTML:', llmHtml);
+
+        // 👉 Update isi modal dengan hasil
+        let modalContent = `
+            <div class="alert ${data.prediction === 'phishing' ? 'alert-danger' : 'alert-success'}">
+                <strong>Prediction:</strong> ${data.prediction}<br>
+                <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%<br>
+                <hr class="alert-hr">
+                ${llmHtml}
+            </div>
+        `;
+
+        document.getElementById('modalResultContent').innerHTML = modalContent;
+
+    } catch (err) {
+        console.error('Request failed:', err);
+        document.getElementById('modalResultContent').innerHTML = `
+            <div class="alert alert-danger"><strong>Error:</strong> ${err.message}</div>
+        `;
+    }
+};
 
 
