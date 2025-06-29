@@ -15,6 +15,8 @@ class PhishingController extends Controller
 {
     public function index(Request $request)
     {
+
+        session(['user_id' => 123]);
         $agent = new Agent();
         $ip = $request->ip();
 
@@ -48,23 +50,23 @@ class PhishingController extends Controller
         ]);
 
         $url = $request->input('url');
-        
+
         // Normalize the URL - add https:// if no protocol is specified
         if (!preg_match('/^https?:\/\//', $url)) {
             $url = 'https://' . $url;
         }
-        
+
         // Validate the normalized URL
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             return response()->json(['error' => 'Invalid URL format'], 400);
         }
-        
+
         try {
             // Log the request
             Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
-            
+
             $response = Http::timeout(30)->post('http://localhost:5000/predict', ['url' => $url]);
-            
+
             // Log the raw response for debugging
             Log::info('Flask API Response', [
                 'status' => $response->status(),
@@ -92,7 +94,7 @@ class PhishingController extends Controller
             }
 
             $data = $response->json();
-            
+
             if (is_null($data)) {
                 Log::error('Failed to parse JSON from Flask API', [
                     'body' => $response->body(),
@@ -103,7 +105,6 @@ class PhishingController extends Controller
 
             // Log successful response
             Log::info('Flask API success', ['data' => $data]);
-
         } catch (\Exception $e) {
             Log::error('Exception calling Flask API', [
                 'message' => $e->getMessage(),
@@ -126,7 +127,7 @@ class PhishingController extends Controller
 
         if ($prediction === 'phishing' && $isTrusted) {
             $adjustedConfidence = max(0, $confidence - 0.3);
-        } 
+        }
         // Jika model bilang ini legit tapi domain tidak trusted → kurangi sedikit confidence legit
         elseif ($prediction === 'legitimate' && !$isTrusted) {
             $adjustedConfidence = max(0, $confidence - 0.1);
