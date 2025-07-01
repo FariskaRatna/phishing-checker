@@ -6,18 +6,24 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/phishing', [PhishingController::class, 'index']);
+Route::get('/phishing', [PhishingController::class, 'index2']);
 Route::post('/phishing/check', [PhishingController::class, 'check']);
 
-Route::get('/home', function () {
-    return view('main.home');
+Route::get('/documentation', function () {
+    return view('main.documentation');
 });
+
+Route::get('/about-us', function () {
+    return view('main.about');
+});
+
+Route::get('/2', [PhishingController::class, 'index']);
 
 //Perbatasan 
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('welcome');
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
