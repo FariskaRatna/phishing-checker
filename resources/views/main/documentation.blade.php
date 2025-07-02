@@ -6,7 +6,7 @@
 @section('main-panel')
 
 <!-- Section: Kasus Link Phishing -->
-<section class="c text-center">
+<section class="hero2 text-center">
     <div class="container">
         <h2 class="fw-bold">Documentation</h2>
         <h4 class="mt-3 mb-4">Kasus Link Phising di Dunia</h4>

@@ -194,6 +194,7 @@
                         </div>
                     </li>
                     <!-- End Dropdown -->
+                    <li class="nav-item"><a class="nav-link" href="/product">Product</a></li>
                     <li class="nav-item"><a class="nav-link" href="/about-us">About US</a></li>
                     <li class="nav-item"><a class="nav-link" href="/documentation">Documentasi</a></li>
                 </ul>
