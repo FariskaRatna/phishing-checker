@@ -1,0 +1,15 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+}
+.section-title {
+    font-weight: 700;
+}
+.value-box {
+    width: 180px;
+}
+.stat-box {
+    border: 1px solid #dee2e6;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}

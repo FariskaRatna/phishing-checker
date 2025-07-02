@@ -19,6 +19,11 @@ Route::get('/home', function () {
 //     return view('welcome');
 // });
 
+Route::get('/about', function () {
+    return view('main.about');
+});
+
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
