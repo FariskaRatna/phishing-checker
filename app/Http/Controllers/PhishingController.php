@@ -63,7 +63,7 @@ class PhishingController extends Controller
             // Log the request
             Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
             
-            $response = Http::timeout(30)->post('http://localhost:5000/predict', ['url' => $url]);
+            $response = Http::timeout(30)->post('http://ec2-34-229-96-108.compute-1.amazonaws.com:8080/predict', ['url' => $url]);
             
             // Log the raw response for debugging
             Log::info('Flask API Response', [
