@@ -49,6 +49,43 @@ class PhishingController extends Controller
 
         $url = $request->input('url');
         
+        if (filter_var($url, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Log::info('Mengirim permintaan ke Flask API Email', ['email' => $url]);
+
+                $response = Http::timeout(30)->post('http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5001/predict', ['email' => $url]);
+
+                if ($response->failed()) {
+                    Log::error('Flask API Email gagal', [
+                        'status' => $response->status(),
+                        'body' => $response->body()
+                    ]);
+                    return response()->json(['error' => 'Flask API Email error: ' . $response->status()], 500);
+                }
+
+                $data = $response->json();
+                $prediction = $data['prediction'] ?? 'phishing';
+                $confidence = 0;
+                $finalPrediction = $prediction . '_low_confidence';
+
+                Phishing::create([
+                    'url' => $url,
+                    'prediction' => $prediction,
+                    'confidence' => $confidence,
+                    'final_prediction' => $finalPrediction
+                ]);
+
+                return response()->json([
+                    'url' => $url,
+                    'prediction' => $prediction,
+                    'confidence' => $confidence,
+                    'final_prediction' => $finalPrediction,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Gagal mengirim permintaan ke Flask API Email: ' . $e->getMessage()], 500);
+            }
+        }
+        
         // Normalize the URL - add https:// if no protocol is specified
         if (!preg_match('/^https?:\/\//', $url)) {
             $url = 'https://' . $url;
