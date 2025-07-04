@@ -161,23 +161,26 @@ class PhishingController extends Controller
             $llmResponse = Http::timeout(60)->post($llmAPI, [
                 'content' => $data['extracted_content'] ?? []
             ]);
-
+            
             Log::info('LLM API Response:', [
                 'url' => $llmAPI,
                 'status' => $llmResponse->status(),
                 'body' => $llmResponse->body()
             ]);
 
+            // Ambil data LLM hanya jika request berhasil
             if ($llmResponse->successful()) {
                 $llmData = $llmResponse->json();
                 $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan inisight dari LLM.';
             } else {
                 Log::warning('Respons LLM tidak berhasil.', ['status' => $llmResponse->status()]);
-            }
+            }   
         }  catch (\Throwable $e) {
+            // Tangkap error koneksi atau lainnya dan catat di log
             Log::error('LLM analisis gagal', ['error' => $e->getMessage()]);
         }
 
+        // Simpan hasil gabungan analisis ke database
         $phishing->update([
             'llm_analysis' => $llmAnalysis
         ]);
