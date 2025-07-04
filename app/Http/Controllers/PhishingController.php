@@ -9,15 +9,78 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Jenssegers\Agent\Agent;
+use Illuminate\Support\Facades\DB;
 
 
 class PhishingController extends Controller
 {
+
     public function index(Request $request)
     {
+        if (auth()->check()) {
+            session(['acces' => 'user']);
+        } else {
+            session(['acces' => 'umum']);
+        }
+
+        session(['user_id' => 123]);
+
+
         $agent = new Agent();
         $ip = $request->ip();
+        session(['ip' => $ip]);
+        // Lokasi IP
+        $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
+        $details = @json_decode($response);
 
+        $ip = '192.178.2';
+        $useracces = DB::select(
+            "SELECT ip 
+             FROM ip_logs
+             WHERE ip = ? 
+               AND createdate BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY - INTERVAL 1 SECOND",
+            [$ip]
+        );
+
+        // Jika belum ada, maka insert
+        if (count($useracces) == 0) {
+            DB::statement(
+                "INSERT INTO ip_logs 
+                (ip, city, region, country, location, device, platform, browser, user_agent, createdate) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    $ip,
+                    $details->city ?? 'Unknown',
+                    $details->region ?? 'Unknown',
+                    $details->country ?? 'Unknown',
+                    $details->loc ?? 'Unknown',
+                    $agent->device(),
+                    $agent->platform() . ' ' . $agent->version($agent->platform()),
+                    $agent->browser() . ' ' . $agent->version($agent->browser()),
+                    $request->header('User-Agent'),
+                    now(),
+                ]
+            );
+        }
+        return view('main.home', [
+            'ip' => $ip,
+            'city' => $details->city ?? 'Unknown',
+            'region' => $details->region ?? 'Unknown',
+            'country' => $details->country ?? 'Unknown',
+            'location' => $details->loc ?? 'Unknown',
+            'device' => $agent->device(),
+            'platform' => $agent->platform() . ' ' . $agent->version($agent->platform()),
+            'browser' => $agent->browser() . ' ' . $agent->version($agent->browser()),
+            'user_agent' => $request->header('User-Agent')
+        ]);
+    }
+    public function index2(Request $request)
+    {
+
+        session(['id_user' => 123]);
+        $agent = new Agent();
+        $ip = $request->ip();
+        session(['ip' => $ip]);
         // Lokasi IP
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
         $details = @json_decode($response);
@@ -90,12 +153,12 @@ class PhishingController extends Controller
         if (!preg_match('/^https?:\/\//', $url)) {
             $url = 'https://' . $url;
         }
-        
+
         // Validate the normalized URL
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             return response()->json(['error' => 'Invalid URL format'], 400);
         }
-        
+
         try {
             // Log the request
             Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
@@ -129,7 +192,7 @@ class PhishingController extends Controller
             }
 
             $data = $response->json();
-            
+
             if (is_null($data)) {
                 Log::error('Failed to parse JSON from Flask API', [
                     'body' => $response->body(),
@@ -140,7 +203,6 @@ class PhishingController extends Controller
 
             // Log successful response
             Log::info('Flask API success', ['data' => $data]);
-
         } catch (\Exception $e) {
             Log::error('Exception calling Flask API', [
                 'message' => $e->getMessage(),
@@ -163,7 +225,7 @@ class PhishingController extends Controller
 
         if ($prediction === 'phishing' && $isTrusted) {
             $adjustedConfidence = max(0, $confidence - 0.3);
-        } 
+        }
         // Jika model bilang ini legit tapi domain tidak trusted → kurangi sedikit confidence legit
         elseif ($prediction === 'legitimate' && !$isTrusted) {
             $adjustedConfidence = max(0, $confidence - 0.1);
@@ -176,9 +238,12 @@ class PhishingController extends Controller
             $finalPrediction .= '_low_confidence';
         }
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
-
+        $ip = session('ip');
+        $id_user = session('id_user') ?? '';
         Phishing::create([
             'url' => $data['url'] ?? $url,
+            // 'ip' => $ip,
+            // 'id_user' => $id_user ?? '',
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
             'domain' => $data['domain'] ?? [],
