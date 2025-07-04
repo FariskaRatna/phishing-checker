@@ -34,7 +34,7 @@
     <div class="row align-items-center">
       <!-- Ilustrasi -->
       <div class="col-md-6 mb-4 mb-md-0 text-center">
-        <img src="https://placehold.co/350x350" alt="Visi Misi" class="img-fluid rounded" />
+        <img src="{{asset('images/about2.jpg')}}" alt="Visi Misi" class="img-fluid rounded" style="max-width: 450px;" />
       </div>
       <!-- Teks -->
       <div class="col-md-6">

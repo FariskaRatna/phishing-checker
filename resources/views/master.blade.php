@@ -93,7 +93,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm position-fixed top-0 start-0 w-100 z-3">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">BUMATARA</a>
+            <a class="navbar-brand fw-bold" href="home">BUMATARA</a>
 
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -112,7 +112,7 @@
                                     <h5 class="fw-bold">BUMATARA's Solutions</h5>
                                     <p class="text-muted">Industry tailored email authentication, deliverability, and
                                         brand identity solutions.</p>
-                                    <a href="#" class="fw-semibold text-decoration-none">About us</a>
+                                    <a href="about" class="fw-semibold text-decoration-none">About us</a>
                                 </div>
                                 <div class="col-md-8">
                                     <div class="row">
