@@ -130,12 +130,16 @@ class PhishingController extends Controller
 
                 $data = $response->json();
                 $prediction = $data['prediction'] ?? 'phishing';
+                $domain = $data['domain'] ?? [];
                 $confidence = $data['confidence'] ?? 0;
+                $features = $data['features'] ?? [];
                 $finalPrediction = $prediction . '_low_confidence';
 
                 Phishing::create([
                     'url' => $url,
                     'prediction' => $prediction,
+                    'domain' => $domain,
+                    'features' => $features,
                     'confidence' => $confidence,
                     'final_prediction' => $finalPrediction
                 ]);
