@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('url');
             $table->string('prediction');
             $table->float('confidence');
-            $table->string('domain');
-            $table->float('phishing_probability');
+            $table->string('domain')->nullable();
+            $table->float('phishing_probability')->nullable();
             $table->json('nameservers')->nullable();
             $table->json('features')->nullable();
             $table->longText('extracted_content')->nullable();
