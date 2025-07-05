@@ -242,7 +242,7 @@ class PhishingController extends Controller
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
         $ip = session('ip');
         $id_user = session('id_user') ?? '';
-        Phishing::create([
+        $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
             // 'ip' => $ip,
             // 'id_user' => $id_user ?? '',
@@ -257,36 +257,38 @@ class PhishingController extends Controller
             'final_prediction' => $finalPrediction,
             'trusted_domain' => $isTrusted,
         ]);
+        // =================== LLM SECTION  ===================
+        $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
+        try {
+            $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
+            $llmResponse = Http::timeout(60)->post($llmAPI, [
+                'content' => $data['extracted_content'] ?? []
+            ]);
+            
+            Log::info('LLM API Response:', [
+                'url' => $llmAPI,
+                'status' => $llmResponse->status(),
+                'body' => $llmResponse->body()
+            ]);
 
-        // $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
+            // Ambil data LLM hanya jika request berhasil
+            if ($llmResponse->successful()) {
+                $llmData = $llmResponse->json();
+                $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan inisight dari LLM.';
+            } else {
+                Log::warning('Respons LLM tidak berhasil.', ['status' => $llmResponse->status()]);
+            }   
+        }  catch (\Throwable $e) {
+            // Tangkap error koneksi atau lainnya dan catat di log
+            Log::error('LLM analisis gagal', ['error' => $e->getMessage()]);
+        }
 
-        // try {
-        //     // Kirim konten ke Flask untuk analisis LLM
-        //     $llmResponse = Http::timeout(60)->get('http://localhost:5002/llm-analyze/' . $phishing->id);
+        // Simpan hasil gabungan analisis ke database
+        $phishing->update([
+            'llm_analysis' => $llmAnalysis
+        ]);
 
-        //     // Log respons dari LLM API untuk debugging
-        //     Log::info('LLM API Response:', [
-        //         'status' => $llmResponse->status(),
-        //         'body' => $llmResponse->json()
-        //     ]);
-
-        //     // Ambil data LLM hanya jika request berhasil
-        //     if ($llmResponse->successful()) {
-        //         $llmData = $llmResponse->json();
-        //         $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan insight dari respons LLM.';
-        //     }
-        // } catch (Throwable $e) {
-        //     // Tangkap error koneksi atau lainnya dan catat di log
-        //     Log::error('Gagal saat menghubungi LLM service: ' . $e->getMessage());
-
-        // }
-
-        // $data['llm_analysis'] = $llmAnalysis;
-
-        // // Simpan hasil gabungan analisis ke database
-        // $phishing->update([
-        //     'llm_analysis' => $llmAnalysis
-        // ]);
+        $data['llm_analysis'] = $llmAnalysis;
 
         return response()->json($data);
     }

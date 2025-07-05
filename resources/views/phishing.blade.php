@@ -131,6 +131,13 @@
                         <strong>Prediction:</strong> ${data.prediction}<br>
                         <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%
                     </div>
+                    <hr>
+                    <div>
+                        <strong>LLM Insight:</strong><br>
+                        <div style="margin-top: 8px; padding: 10px; background-color: #f0f0f0; border-left: 4px solid #007bff; white-space: pre-wrap;">
+                            ${escapeHtml(data.llm_analysis || 'LLM analisis tidak tersedia.')}
+                        </div>
+                    </div>
                 `;
             } catch (err) {
                 resDiv.innerHTML = `<div class="alert alert-warning">Error: ${err.message}</div>`;
