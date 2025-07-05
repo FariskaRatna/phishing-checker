@@ -131,20 +131,82 @@ class PhishingController extends Controller
                 $data = $response->json();
                 $prediction = $data['prediction'] ?? 'phishing';
                 $confidence = $data['confidence'] ?? 0;
-                $finalPrediction = $prediction . '_low_confidence';
+                $domainStr = (string) ($data['domain'] ?? '');
+                $features = $data['features'] ?? [];
 
-                Phishing::create([
+                $trustedDomains = json_decode(file_get_contents(storage_path('app/trusted_domain.json')), true);
+                $isTrusted = collect($trustedDomains)->contains(function ($trusted) use ($domainStr) {
+                    return $domainStr && str_ends_with($domainStr, $trusted);
+                }); 
+
+                // Adjusted Confidence
+                $adjustedConfidence = $confidence;
+                if ($prediction === 'phishing' && $isTrusted) {
+                    $adjustedConfidence = max(0, $confidence - 0.3);
+                } elseif ($prediction === 'legitimate' && !$isTrusted) {
+                    $adjustedConfidence = max(0, $confidence - 0.1);
+                }
+
+                // Final Prediction
+                $finalPrediction = $prediction;
+                if ($adjustedConfidence < 0.5) {
+                    $finalPrediction .= '_low_confidence';
+                }
+
+                $phishing = Phishing::create([
                     'url' => $url,
                     'prediction' => $prediction,
                     'confidence' => $confidence,
-                    'final_prediction' => $finalPrediction
+                    'domain' => $domainStr,
+                    'features' => $features,
+                    'adjusted_confidence' => $adjustedConfidence,
+                    'final_prediction' => $finalPrediction,
+                    'trusted_domain' => $isTrusted
                 ]);
 
+                // =================== EMAIL LLM SECTION ===================
+                $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
+                try {
+                    $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
+                    $llmResponse = Http::timeout(60)->post($llmAPI, [
+                        'context' => [
+                            'input_type' => 'email',
+                            'value' => $url,
+                            'prediction' => $prediction,
+                            'confidence' => $confidence,
+                            'adjusted_confidence' => $adjustedConfidence,
+                            'trusted_domain' => $isTrusted,
+                            #'features' => $features
+                        ]
+                    ]);
+
+                    Log::info('LLM API Response for Email:', [
+                        'url' => $llmAPI,
+                        'status' => $llmResponse->status(),
+                        'body' => $llmResponse->body()
+                    ]);
+
+                    if ($llmResponse->successful()) {
+                        $llmData = $llmResponse->json();
+                        $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan insight dari LLM.';
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('LLM analisis email gagal', ['error' => $e->getMessage()]);
+                }
+
+                $phishing->update(['llm_analysis' => $llmAnalysis]);
+
                 return response()->json([
+                    'input_type' => 'email',
                     'url' => $url,
                     'prediction' => $prediction,
                     'confidence' => $confidence,
+                    'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
+                    'trusted_domain' => $isTrusted,
+                    'features' => $features,
+                    'domain' => $domainStr,
+                    'llm_analysis' => $llmAnalysis
                 ]);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Gagal mengirim permintaan ke Flask API Email: ' . $e->getMessage()], 500);
@@ -263,7 +325,8 @@ class PhishingController extends Controller
         try {
             $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
             $llmResponse = Http::timeout(60)->post($llmAPI, [
-                'content' => [
+                'context' => [
+                    'input_type' => 'url',
                     'prediction' => $data['prediction'] ?? '',
                     'confidence' => $data['confidence'] ?? 0,
                     'trusted_domain' => $isTrusted,
