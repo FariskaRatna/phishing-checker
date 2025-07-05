@@ -111,7 +111,9 @@ class PhishingController extends Controller
         ]);
 
         $url = $request->input('url');
-        
+
+
+        // CHECK EMAIL
         if (filter_var($url, FILTER_VALIDATE_EMAIL)) {
             try {
                 Log::info('Mengirim permintaan ke Flask API Email', ['email' => $url]);
@@ -128,7 +130,7 @@ class PhishingController extends Controller
 
                 $data = $response->json();
                 $prediction = $data['prediction'] ?? 'phishing';
-                $confidence = 0;
+                $confidence = $data['confidence'] ?? 0;
                 $finalPrediction = $prediction . '_low_confidence';
 
                 Phishing::create([
@@ -149,7 +151,7 @@ class PhishingController extends Controller
             }
         }
         
-        // Normalize the URL - add https:// if no protocol is specified
+        // CHECK URL
         if (!preg_match('/^https?:\/\//', $url)) {
             $url = 'https://' . $url;
         }
