@@ -257,12 +257,18 @@ class PhishingController extends Controller
             'final_prediction' => $finalPrediction,
             'trusted_domain' => $isTrusted,
         ]);
-        // =================== LLM SECTION  ===================
+
+        // =================== URL LLM SECTION  ===================
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
         try {
             $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
             $llmResponse = Http::timeout(60)->post($llmAPI, [
-                'content' => $data['extracted_content'] ?? []
+                'content' => [
+                    'prediction' => $data['prediction'] ?? '',
+                    'confidence' => $data['confidence'] ?? 0,
+                    'trusted_domain' => $isTrusted,
+                    'extracted_content' => $data['extracted_content'] ?? []
+                ]
             ]);
             
             Log::info('LLM API Response:', [
