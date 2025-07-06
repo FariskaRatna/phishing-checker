@@ -8,84 +8,84 @@
     <title>Phishing URL Checker - BUMATARA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .hero {
-            background-color: #0e1625;
-            color: white;
-            padding: 100px 20px 160px;
-            text-align: center;
-            position: relative;
-        }
+    .hero {
+        background-color: #0e1625;
+        color: white;
+        padding: 100px 20px 160px;
+        text-align: center;
+        position: relative;
+    }
 
-        .hero2 {
-            background-color: #0e1625;
-            color: white;
-            padding: 100px 20px 20px;
-            text-align: center;
-            position: relative;
-        }
+    .hero2 {
+        background-color: #0e1625;
+        color: white;
+        padding: 100px 20px 20px;
+        text-align: center;
+        position: relative;
+    }
 
-        .url-checker-box {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 600px;
-            margin: 0 auto;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    .url-checker-box {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
 
-            position: absolute;
-            bottom: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
-        }
+        position: absolute;
+        bottom: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 600px;
+    }
 
-        .quote-box {
-            background-color: #f8f9fa;
-            border-left: 5px solid #e0e0e0;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
+    .quote-box {
+        background-color: #f8f9fa;
+        border-left: 5px solid #e0e0e0;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
 
-        footer {
-            background-color: #0e1625;
-            color: white;
-            padding: 40px 0;
-        }
+    footer {
+        background-color: #0e1625;
+        color: white;
+        padding: 40px 0;
+    }
 
-        .footer-links a {
-            color: #adb5bd;
-            text-decoration: none;
-        }
+    .footer-links a {
+        color: #adb5bd;
+        text-decoration: none;
+    }
 
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
+    .footer-links a:hover {
+        text-decoration: underline;
+    }
 
-        .radius1 {
-            border-top-right-radius: 0.375rem;
-            border-bottom-right-radius: 0.375rem;
-        }
+    .radius1 {
+        border-top-right-radius: 0.375rem;
+        border-bottom-right-radius: 0.375rem;
+    }
 
-        #urlList li:hover {
-            cursor: pointer;
-            background-color: #b7ff64;
-        }
+    #urlList li:hover {
+        cursor: pointer;
+        background-color: #b7ff64;
+    }
 
-        .dropdown-menu.show {
-            display: block !important;
-        }
+    .dropdown-menu.show {
+        display: block !important;
+    }
 
-        .position-static {
-            position: static !important;
-        }
+    .position-static {
+        position: static !important;
+    }
 
-        @media (max-width: 768px) {
-            .dropdown-menu {
-                max-width: 100% !important;
-            }
+    @media (max-width: 768px) {
+        .dropdown-menu {
+            max-width: 100% !important;
         }
+    }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -199,11 +199,20 @@
                     <li class="nav-item"><a class="nav-link" href="/about-us">About US</a></li>
                     <li class="nav-item"><a class="nav-link" href="/documentation">Documentasi</a></li>
                 </ul>
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
+                    @auth
+                    <span class="me-3">👋 Hi, {{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                    @else
                     <a href="#" class="btn btn-outline-primary me-2" data-bs-toggle="modal"
                         data-bs-target="#signinModal">Sign In</a>
                     <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a>
+                    @endauth
                 </div>
+
 
             </div>
         </div>
@@ -224,11 +233,11 @@
                         @csrf
                         <div class="mb-3">
                             <label for="emailSignin" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="emailSignin" name="email" required autofocus>
+                            <input type="email" class="form-control" id="email" name="email" required autofocus>
                         </div>
                         <div class="mb-3">
                             <label for="passwordSignin" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="passwordSignin" name="password" required>
+                            <input type="password" class="form-control" id="password" name="password" required>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Sign In</button>
                     </form>
@@ -297,6 +306,17 @@
             </div>
         </div>
     </div>
+
+    @if ($errors->has('status'))
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        handleResponse({
+            status: "error",
+            message: "{{ $errors->first('status') }}"
+        });
+    });
+    </script>
+    @endi
 
 </body>
 <!-- Footer -->

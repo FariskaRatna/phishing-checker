@@ -19,13 +19,6 @@
             <button class="btn btn-primary" type="submit">Scan</button>
         </form>
         <div id="singleResult" class="result"></div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resultModal">
-            Modal
-        </button>
-
-        <!-- Modal -->
-
-
 
 
     </div>
@@ -320,38 +313,40 @@
 
 <!-- Modal Pemberitahuan Berhasil -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content border-success">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title" id="successModalLabel">Berhasil</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="successMessage">
-        <!-- Pesan akan diisi oleh script -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Tutup</button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content border-success">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">Berhasil</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="successMessage">
+                <!-- Pesan akan diisi oleh script -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Modal Peringatan / Error -->
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="errorModalLabel">Peringatan</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="errorMessage">
-        <!-- Pesan akan diisi oleh script -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Peringatan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="errorMessage">
+                <!-- Pesan akan diisi oleh script -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 
@@ -361,32 +356,17 @@
 <script src="/java.js"></script>
 
 <script>
-  function handleResponse(response) {
-    if (response.status === "success") {
-      document.getElementById('successMessage').innerText = response.message;
-      var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-      successModal.show();
-    } else if (response.status === "error") {
-      document.getElementById('errorMessage').innerText = response.message;
-      var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-      errorModal.show();
-    }
-  }
-
-  // 🔥 Simulasi Response
-  const responseSuccess = {
-    status: "success",
-    message: "Data berhasil disimpan ke server."
-  };
-
-  const responseError = {
-    status: "error",
-    message: "Gagal menyimpan data. Coba lagi nanti."
-  };
-
-  // 🔧 Contoh pemanggilan:
-  handleResponse(responseSuccess);
-  // handleResponse(responseError);
+    function handleResponse(response) {
+        if (response.status === "success") {
+            document.getElementById('successMessage').innerText = response.message;
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        } else if (response.status === "error") {
+            document.getElementById('errorMessage').innerText = response.message;
+            var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        }
+    };
 </script>
 
 @endpush

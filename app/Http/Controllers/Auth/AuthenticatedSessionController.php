@@ -26,10 +26,30 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Ambil user yang sedang login
+        $user = Auth::user();
+
+        // Cek kolom status
+        if ($user->status <= 0) {
+            // Logout user
+            Auth::logout();
+
+            // Invalidate session
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // Kembali ke halaman sebelumnya dengan error
+            return back()->withErrors([
+                'status' => 'Akun Anda tidak aktif. Silakan hubungi admin.',
+            ]);
+        }
+
+        // Kalau status > 0, lanjutkan login
         $request->session()->regenerate();
 
-        return redirect('/');
+        return redirect('/dashboard');
     }
+
 
     /**
      * Destroy an authenticated session.
