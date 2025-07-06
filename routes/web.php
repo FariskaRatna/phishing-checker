@@ -21,7 +21,7 @@ Route::get('/product', function () {
     return view('main.product');
 });
 
-Route::get('/2', [PhishingController::class, 'index']);
+Route::get('/', [PhishingController::class, 'index']);
 
 //Perbatasan 
 
