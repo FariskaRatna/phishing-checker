@@ -107,7 +107,17 @@ function formatLlmAnalysis(text) {
 
 document.getElementById('singleForm').onsubmit = async function (e) {
     e.preventDefault();
+
+    let quota = document.getElementById('quota').value;
     let url = document.getElementById('url').value;
+
+    if (quota <= 0) {
+        // Tampilkan modal popup quota habis
+        const quotaModal = new bootstrap.Modal(document.getElementById('quotaModal'));
+        quotaModal.show();
+        return false; // ❌ Hentikan proses
+    }
+
 
     console.log('Form submitted with URL:', url);
 

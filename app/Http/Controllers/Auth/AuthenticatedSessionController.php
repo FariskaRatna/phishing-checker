@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         // Cek kolom status
-        if ($user->status <= 0) {
+        if ($user->rule <= 0) {
             // Logout user
             Auth::logout();
 
@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
         // Kalau status > 0, lanjutkan login
         $request->session()->regenerate();
 
-        return redirect('/dashboard');
+        return redirect('/')->with('welcome', 'Selamat datang, ' . $user->name . '!');
     }
 
 
@@ -62,6 +62,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('logoutSuccess', 'Anda berhasil logout.');
     }
 }

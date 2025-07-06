@@ -11,10 +11,11 @@
     <p class="lead mb-4">Our phishing URL checker detects if a URL is malicious or contains a phishing link.</p>
     <div class="url-checker-box">
         <div class="text-end">
-            <p class="text-muted" style=" text-align: right;  color: black;">Quota Check : 2</p>
+            <p class="text-muted" style=" text-align: right;  color: black;">Quota Check : {{ session('quota') }}</p>
         </div>
         <p class="text-muted mt-2 text-center">Detect if a URL has a phishing link or is malicious.</p>
         <form class="d-flex" id="singleForm">
+            <input type="hidden" id="quota" value="{{ session('quota') }}">
             <input type="text" name="url" id="url" class="form-control me-2" placeholder="example.com">
             <button class="btn btn-primary" type="submit">Scan</button>
         </form>
@@ -344,6 +345,27 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Quota Habis -->
+<div class="modal fade" id="quotaModal" tabindex="-1" aria-labelledby="quotaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="quotaModalLabel">Quota Habis</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ❌ Quota Check URL Anda sudah habis.<br>
+                Silakan upgrade ke <strong>User Pro</strong> untuk mendapatkan quota lebih banyak.
+            </div>
+            <div class="modal-footer">
+                <a href="/product" class="btn btn-primary">Upgrade Sekarang</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>

@@ -8,84 +8,84 @@
     <title>Phishing URL Checker - BUMATARA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-    .hero {
-        background-color: #0e1625;
-        color: white;
-        padding: 100px 20px 160px;
-        text-align: center;
-        position: relative;
-    }
-
-    .hero2 {
-        background-color: #0e1625;
-        color: white;
-        padding: 100px 20px 20px;
-        text-align: center;
-        position: relative;
-    }
-
-    .url-checker-box {
-        background: white;
-        border-radius: 10px;
-        padding: 30px;
-        max-width: 600px;
-        margin: 0 auto;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-
-        position: absolute;
-        bottom: -60px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 600px;
-    }
-
-    .quote-box {
-        background-color: #f8f9fa;
-        border-left: 5px solid #e0e0e0;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-
-    footer {
-        background-color: #0e1625;
-        color: white;
-        padding: 40px 0;
-    }
-
-    .footer-links a {
-        color: #adb5bd;
-        text-decoration: none;
-    }
-
-    .footer-links a:hover {
-        text-decoration: underline;
-    }
-
-    .radius1 {
-        border-top-right-radius: 0.375rem;
-        border-bottom-right-radius: 0.375rem;
-    }
-
-    #urlList li:hover {
-        cursor: pointer;
-        background-color: #b7ff64;
-    }
-
-    .dropdown-menu.show {
-        display: block !important;
-    }
-
-    .position-static {
-        position: static !important;
-    }
-
-    @media (max-width: 768px) {
-        .dropdown-menu {
-            max-width: 100% !important;
+        .hero {
+            background-color: #0e1625;
+            color: white;
+            padding: 100px 20px 160px;
+            text-align: center;
+            position: relative;
         }
-    }
+
+        .hero2 {
+            background-color: #0e1625;
+            color: white;
+            padding: 100px 20px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .url-checker-box {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .quote-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #0e1625;
+            color: white;
+            padding: 40px 0;
+        }
+
+        .footer-links a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .radius1 {
+            border-top-right-radius: 0.375rem;
+            border-bottom-right-radius: 0.375rem;
+        }
+
+        #urlList li:hover {
+            cursor: pointer;
+            background-color: #b7ff64;
+        }
+
+        .dropdown-menu.show {
+            display: block !important;
+        }
+
+        .position-static {
+            position: static !important;
+        }
+
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                max-width: 100% !important;
+            }
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -202,10 +202,12 @@
                 <div class="d-flex align-items-center">
                     @auth
                     <span class="me-3">👋 Hi, {{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-danger">Logout</button>
-                    </form>
+                    <!-- Tombol Logout -->
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                        data-bs-target="#confirmLogoutModal">
+                        Logout
+                    </button>
+
                     @else
                     <a href="#" class="btn btn-outline-primary me-2" data-bs-toggle="modal"
                         data-bs-target="#signinModal">Sign In</a>
@@ -307,16 +309,64 @@
         </div>
     </div>
 
+
+    <!-- Modal Konfirmasi Logout -->
+    <div class="modal fade" id="confirmLogoutModal" tabindex="-1" aria-labelledby="confirmLogoutModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmLogoutModalLabel">Konfirmasi Logout</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin logout?
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" action="{{ route('logout') }}" id="logoutForm">
+                        @csrf
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Ya, Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @if ($errors->has('status'))
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        handleResponse({
-            status: "error",
-            message: "{{ $errors->first('status') }}"
+        document.addEventListener("DOMContentLoaded", function() {
+            handleResponse({
+                status: "error",
+                message: "{{ $errors->first('status') }}"
+            });
         });
-    });
     </script>
-    @endi
+    @endif
+
+    @if (session('welcome'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            handleResponse({
+                status: "success",
+                message: "{{ session('welcome') }}"
+            });
+        });
+    </script>
+    @endif
+    @if (session('logoutSuccess'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            handleResponse({
+                status: "success",
+                message: "{{ session('logoutSuccess') }}"
+            });
+        });
+    </script>
+    @endif
+
+
 
 </body>
 <!-- Footer -->
@@ -370,6 +420,10 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+</script>
 
 @stack('scripts')
 

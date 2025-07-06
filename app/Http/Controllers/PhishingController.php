@@ -17,37 +17,69 @@ class PhishingController extends Controller
 
     public function index(Request $request)
     {
-        if (auth()->check()) {
-            session(['acces' => 'user']);
-        } else {
-            session(['acces' => 'umum']);
-        }
-
-        session(['user_id' => 123]);
-
-
         $agent = new Agent();
         $ip = $request->ip();
         session(['ip' => $ip]);
-        // Lokasi IP
+
+        if (auth()->check()) {
+            session([
+                'acces' => 'user',
+                'user_id' => auth()->id()
+            ]);
+
+            $id_user = auth()->id();
+
+            $id_user = 1;
+            $quota = DB::selectOne(
+                "SELECT 
+                (a.quota - (
+                    SELECT COUNT(id)
+                    FROM phishings p
+                    WHERE p.id_user = ?
+                      AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
+                                          AND LAST_DAY(CURDATE())
+                )) AS sisa_quota
+            FROM user_quota a
+            WHERE a.id_user = ?",
+                [$id_user, $id_user]
+            )->sisa_quota ?? 0;
+        } else {
+            session([
+                'acces' => 'umum',
+                'user_id' => null
+            ]);
+
+            $quotaumum = DB::scalar(
+                "SELECT COUNT(id)
+             FROM phishings p
+             WHERE p.ip = ?
+               AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
+                                   AND LAST_DAY(CURDATE())",
+                [$ip]
+            );
+
+            $quota = 5 - $quotaumum;
+        }
+
+        $quota = 0;
+        session(['quota' => $quota]);
+
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
         $details = @json_decode($response);
 
-        $ip = '192.178.2';
         $useracces = DB::select(
             "SELECT ip 
-             FROM ip_logs
-             WHERE ip = ? 
-               AND createdate BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY - INTERVAL 1 SECOND",
+         FROM ip_logs
+         WHERE ip = ? 
+           AND createdate BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY - INTERVAL 1 SECOND",
             [$ip]
         );
 
-        // Jika belum ada, maka insert
-        if (count($useracces) == 0) {
+        if (auth()->check()) {
             DB::statement(
                 "INSERT INTO ip_logs 
-                (ip, city, region, country, location, device, platform, browser, user_agent, createdate) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+             (ip, city, region, country, location, device, platform, browser, user_agent, createdate, user_id) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                     $ip,
                     $details->city ?? 'Unknown',
@@ -59,9 +91,29 @@ class PhishingController extends Controller
                     $agent->browser() . ' ' . $agent->version($agent->browser()),
                     $request->header('User-Agent'),
                     now(),
+                    auth()->id()
+                ]
+            );
+        } elseif (count($useracces) == 0) {
+            DB::statement(
+                "INSERT INTO ip_logs 
+             (ip, city, region, country, location, device, platform, browser, user_agent, createdate) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    $ip,
+                    $details->city ?? 'Unknown',
+                    $details->region ?? 'Unknown',
+                    $details->country ?? 'Unknown',
+                    $details->loc ?? 'Unknown',
+                    $agent->device(),
+                    $agent->platform() . ' ' . $agent->version($agent->platform()),
+                    $agent->browser() . ' ' . $agent->version($agent->browser()),
+                    $request->header('User-Agent'),
+                    now()
                 ]
             );
         }
+
         return view('main.home', [
             'ip' => $ip,
             'city' => $details->city ?? 'Unknown',
@@ -74,6 +126,7 @@ class PhishingController extends Controller
             'user_agent' => $request->header('User-Agent')
         ]);
     }
+
     public function index2(Request $request)
     {
 
@@ -138,7 +191,7 @@ class PhishingController extends Controller
                 $trustedDomains = json_decode(file_get_contents(storage_path('app/trusted_domain.json')), true);
                 $isTrusted = collect($trustedDomains)->contains(function ($trusted) use ($domainStr) {
                     return $domainStr && str_ends_with($domainStr, $trusted);
-                }); 
+                });
 
                 // Adjusted Confidence
                 $adjustedConfidence = $confidence;
@@ -215,7 +268,7 @@ class PhishingController extends Controller
                 return response()->json(['error' => 'Gagal mengirim permintaan ke Flask API Email: ' . $e->getMessage()], 500);
             }
         }
-        
+
         // CHECK URL
         if (!preg_match('/^https?:\/\//', $url)) {
             $url = 'https://' . $url;
@@ -229,9 +282,9 @@ class PhishingController extends Controller
         try {
             // Log the request
             Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
-            
+
             $response = Http::timeout(30)->post('http://ec2-34-229-96-108.compute-1.amazonaws.com:8080/predict', ['url' => $url]);
-            
+
             // Log the raw response for debugging
             Log::info('Flask API Response', [
                 'status' => $response->status(),
@@ -336,7 +389,7 @@ class PhishingController extends Controller
                     'extracted_content' => $data['extracted_content'] ?? []
                 ]
             ]);
-            
+
             Log::info('LLM API Response:', [
                 'url' => $llmAPI,
                 'status' => $llmResponse->status(),
@@ -349,8 +402,8 @@ class PhishingController extends Controller
                 $llmAnalysis = $llmData['llm_insight'] ?? 'Gagal mendapatkan inisight dari LLM.';
             } else {
                 Log::warning('Respons LLM tidak berhasil.', ['status' => $llmResponse->status()]);
-            }   
-        }  catch (\Throwable $e) {
+            }
+        } catch (\Throwable $e) {
             // Tangkap error koneksi atau lainnya dan catat di log
             Log::error('LLM analisis gagal', ['error' => $e->getMessage()]);
         }

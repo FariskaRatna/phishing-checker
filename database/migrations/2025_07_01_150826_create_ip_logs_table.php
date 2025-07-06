@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('browser', 100)->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamp('createdate')->useCurrent();
+            $table->string('user_id', 100)->nullable();
         });
     }
 
