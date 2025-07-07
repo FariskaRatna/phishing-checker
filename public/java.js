@@ -155,9 +155,9 @@ document.getElementById('singleForm').onsubmit = async function (e) {
 
         // 👉 Update isi modal dengan hasil
         let modalContent = `
-            <div class="alert ${data.prediction === 'phishing' ? 'alert-danger' : 'alert-success'}">
-                <strong>Prediction:</strong> ${data.prediction}<br>
-                <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%<br>
+            <div class="alert ${data.final_prediction === 'phishing' ? 'alert-danger' : 'alert-success'}">
+                <strong>Prediction:</strong> ${data.final_prediction}<br>
+                <strong>Confidence:</strong> ${(data.final_confidence * 100).toFixed(2)}%<br>
                 <hr class="alert-hr">
                 ${llmHtml}
             </div>

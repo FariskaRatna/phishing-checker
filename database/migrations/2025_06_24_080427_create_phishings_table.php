@@ -23,6 +23,7 @@ return new class extends Migration
             $table->longText('extracted_content')->nullable();
             $table->float('adjusted_confidence')->nullable();
             $table->string('final_prediction')->nullable();
+            $table->float('final_confidence')->nullable();
             $table->boolean('trusted_domain')->nullable();
             $table->longText('llm_analysis')->nullable();
             $table->timestamps();
