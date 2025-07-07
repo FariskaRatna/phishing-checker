@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('phishings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('ip_address', 45)->nullable();
+
             $table->string('url');
             $table->string('prediction');
             $table->float('confidence');
@@ -23,6 +26,7 @@ return new class extends Migration
             $table->longText('extracted_content')->nullable();
             $table->float('adjusted_confidence')->nullable();
             $table->string('final_prediction')->nullable();
+            $table->string('final_confidence')->nullable();
             $table->boolean('trusted_domain')->nullable();
             $table->longText('llm_analysis')->nullable();
             $table->timestamps();

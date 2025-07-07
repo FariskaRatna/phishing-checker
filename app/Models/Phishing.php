@@ -8,7 +8,8 @@ class Phishing extends Model
 {
     protected $fillable = [
         'url', 'prediction', 'confidence', 'domain', 'phishing_probability', 'nameservers', 'features',
-        'extracted_content', 'adjusted_confidence', 'final_prediction', 'trusted_domain', 'llm_analysis'
+        'extracted_content', 'adjusted_confidence', 'final_prediction', 'final_confidence',
+         'trusted_domain', 'llm_analysis', 'user_id', 'ip_address'
     ];
 
     protected $casts = [

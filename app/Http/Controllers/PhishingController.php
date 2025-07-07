@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\DB;
@@ -24,24 +25,23 @@ class PhishingController extends Controller
         if (auth()->check()) {
             session([
                 'acces' => 'user',
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
-            $id_user = auth()->id();
+            $user = auth()->user();
 
-            $id_user = 1;
             $quota = DB::selectOne(
                 "SELECT 
                 (a.quota - (
                     SELECT COUNT(id)
                     FROM phishings p
-                    WHERE p.id_user = ?
+                    WHERE p.user_id = ?
                       AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
                                           AND LAST_DAY(CURDATE())
                 )) AS sisa_quota
             FROM user_quota a
-            WHERE a.id_user = ?",
-                [$id_user, $id_user]
+            WHERE a.id_user = ?", // This column name is correct for the user_quota table
+                [$user->id, $user->id]
             )->sisa_quota ?? 0;
         } else {
             session([
@@ -52,7 +52,7 @@ class PhishingController extends Controller
             $quotaumum = DB::scalar(
                 "SELECT COUNT(id)
              FROM phishings p
-             WHERE p.ip = ?
+             WHERE p.ip_address = ?
                AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
                                    AND LAST_DAY(CURDATE())",
                 [$ip]
@@ -61,7 +61,6 @@ class PhishingController extends Controller
             $quota = 5 - $quotaumum;
         }
 
-        $quota = 0;
         session(['quota' => $quota]);
 
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
@@ -339,13 +338,16 @@ class PhishingController extends Controller
             return $domain && str_ends_with($domain, $trusted);
         });
 
+        $confidence = $data['confidence'] ?? 0;
         $phishingProb = $data['phishing_probability'] ?? (1 - ($data['confidence'] ?? 0));
         $adjustedConfidence = $phishingProb;
 
-        if ($isTrusted) {
-            $adjustedConfidence = max(0, $phishingProb - 0.2);
-        } else {
-            $adjustedConfidence = min(1, $phishingProb + 0.1);
+        if ($confidence < 0.96) {
+            if ($isTrusted) {
+                $adjustedConfidence = max(0, $phishingProb - 0.1);
+            } else {
+                $adjustedConfidence = min(1, $phishingProb + 0.1);
+            }
         }
 
         $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legitimate';
@@ -353,13 +355,14 @@ class PhishingController extends Controller
         if ($adjustedConfidence >= 0.45 && $adjustedConfidence < 0.55) {
             $finalPrediction .= '_low_confidence';
         }
+
+        $finalConfidence = 1 - $adjustedConfidence;
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
-        $ip = session('ip');
-        $id_user = session('id_user') ?? '';
+
         $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
-            // 'ip' => $ip,
-            // 'id_user' => $id_user ?? '',
+            'ip_address' => $request->ip(),
+            'user_id' => auth()->id(), // Automatically gets the logged-in user's ID, or null for guests
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
             'domain' => $data['domain'] ?? [],
@@ -369,9 +372,13 @@ class PhishingController extends Controller
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
             'adjusted_confidence' => $adjustedConfidence,
             'final_prediction' => $finalPrediction,
+            'final_confidence' => $finalConfidence,
             'trusted_domain' => $isTrusted,
         ]);
 
+        $data['final_prediction'] = $finalPrediction;
+        $data['final_confidence'] = $finalConfidence;
+        
         // =================== URL LLM SECTION  ===================
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
         try {
