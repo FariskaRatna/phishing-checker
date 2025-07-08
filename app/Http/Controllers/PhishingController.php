@@ -7,11 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
-use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Jenssegers\Agent\Agent;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\PhishingReportExport;
 use Illuminate\Support\Facades\DB;
 
 
@@ -27,23 +24,24 @@ class PhishingController extends Controller
         if (auth()->check()) {
             session([
                 'acces' => 'user',
-                'user_id' => auth()->id(),
+                'user_id' => auth()->id()
             ]);
 
-            $user = auth()->user();
+            $id_user = auth()->id();
+
 
             $quota = DB::selectOne(
                 "SELECT 
                 (a.quota - (
                     SELECT COUNT(id)
                     FROM phishings p
-                    WHERE p.user_id = ?
+                    WHERE p.id_user = ?
                       AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
                                           AND LAST_DAY(CURDATE())
                 )) AS sisa_quota
             FROM user_quota a
-            WHERE a.id_user = ?", // This column name is correct for the user_quota table
-                [$user->id, $user->id]
+            WHERE a.id_user = ?",
+                [$id_user, $id_user]
             )->sisa_quota ?? 0;
         } else {
             session([
@@ -54,15 +52,16 @@ class PhishingController extends Controller
             $quotaumum = DB::scalar(
                 "SELECT COUNT(id)
              FROM phishings p
-             WHERE p.ip_address = ?
+             WHERE p.ip = ?
                AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
                                    AND LAST_DAY(CURDATE())",
                 [$ip]
-            );
+            ) ?? 0;
 
             $quota = 5 - $quotaumum;
         }
 
+        // $quota = 1;
         session(['quota' => $quota]);
 
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
@@ -139,9 +138,8 @@ class PhishingController extends Controller
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
         $details = @json_decode($response);
 
-        $phishings = Phishing::latest()->paginate(15);
 
-        return view('export', [
+        return view('phishing', [
             'ip' => $ip,
             'city' => $details->city ?? 'Unknown',
             'region' => $details->region ?? 'Unknown',
@@ -150,8 +148,7 @@ class PhishingController extends Controller
             'device' => $agent->device(),
             'platform' => $agent->platform() . ' ' . $agent->version($agent->platform()),
             'browser' => $agent->browser() . ' ' . $agent->version($agent->browser()),
-            'user_agent' => $request->header('User-Agent'),
-            'phishings' => $phishings
+            'user_agent' => $request->header('User-Agent')
         ]);
     }
 
@@ -169,6 +166,9 @@ class PhishingController extends Controller
         $url = $request->input('url');
 
 
+
+        // var_dump($url);
+        // die;
         // CHECK EMAIL
         if (filter_var($url, FILTER_VALIDATE_EMAIL)) {
             try {
@@ -191,23 +191,17 @@ class PhishingController extends Controller
                 $domainStr = (string) ($data['domain'] ?? '');
                 $features = $data['features'] ?? [];
 
-                $trustedDomains = json_decode(file_get_contents(storage_path('app/top100domains.json')), true);
+                $trustedDomains = json_decode(file_get_contents(storage_path('app/trusted_domain.json')), true);
                 $isTrusted = collect($trustedDomains)->contains(function ($trusted) use ($domainStr) {
                     return $domainStr && str_ends_with($domainStr, $trusted);
                 });
 
                 // Adjusted Confidence
                 $adjustedConfidence = $confidence;
-                if ($confidence < 0.88) {
-                    if ($prediction === 'phishing' && $isTrusted) {
-                        $adjustedConfidence = max(0, $confidence - 0.1);
-                    } elseif ($prediction === 'legitimate' && !$isTrusted) {
-                        $adjustedConfidence = max(0, $confidence - 0.1);
-                    } elseif ($prediction === 'phishing' && !$isTrusted) {
-                        $adjustedConfidence = min(1, $confidence + 0.1);
-                    } elseif($prediction === 'legitimate' && $isTrusted) {
-                        $adjustedConfidence = min(1, $confidence + 0.1);
-                    }
+                if ($prediction === 'phishing' && $isTrusted) {
+                    $adjustedConfidence = max(0, $confidence - 0.3);
+                } elseif ($prediction === 'legitimate' && !$isTrusted) {
+                    $adjustedConfidence = max(0, $confidence - 0.1);
                 }
 
                 // Final Prediction
@@ -215,8 +209,6 @@ class PhishingController extends Controller
                 if ($adjustedConfidence < 0.5) {
                     $finalPrediction .= '_low_confidence';
                 }
-
-                $finalConfidence = $adjustedConfidence;
 
                 $phishing = Phishing::create([
                     'url' => $url,
@@ -228,7 +220,6 @@ class PhishingController extends Controller
                     'features' => $features,
                     'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
-                    'final_confidence' => $finalConfidence,
                     'trusted_domain' => $isTrusted
                 ]);
 
@@ -271,7 +262,6 @@ class PhishingController extends Controller
                     'confidence' => $confidence,
                     'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
-                    'final_confidence' => $finalConfidence,
                     'trusted_domain' => $isTrusted,
                     'features' => $features,
                     'domain' => $domainStr,
@@ -352,38 +342,31 @@ class PhishingController extends Controller
             return $domain && str_ends_with($domain, $trusted);
         });
 
+        $prediction = $data['prediction'] ?? 'phishing';
         $confidence = $data['confidence'] ?? 0;
-        $prediction = $data['prediction'] ?? '';
-        $phishingProb = $data['phishing_probability'] ?? (1 - ($data['confidence'] ?? 0));
-        $adjustedConfidence = $phishingProb;
+        $adjustedConfidence = $confidence;
 
-        if ($confidence < 0.89) {
-            if ($isTrusted) {
-                $adjustedConfidence = max(0, $phishingProb - 0.1);
-            } else {
-                $adjustedConfidence = min(1, $phishingProb + 0.1);
-            }
+        if ($prediction === 'phishing' && $isTrusted) {
+            $adjustedConfidence = max(0, $confidence - 0.3);
+        }
+        // Jika model bilang ini legit tapi domain tidak trusted → kurangi sedikit confidence legit
+        elseif ($prediction === 'legitimate' && !$isTrusted) {
+            $adjustedConfidence = max(0, $confidence - 0.1);
         }
 
-        $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legitimate';
-
-        if ($adjustedConfidence >= 0.45 && $adjustedConfidence < 0.55) {
+        // Lalu prediksi akhirnya tetap mengacu ke label & confidence
+        $finalPrediction = $prediction;
+        if ($adjustedConfidence < 0.5) {
+            // Jika confidence rendah, kita bisa kasih warning
             $finalPrediction .= '_low_confidence';
         }
-
-        if ($prediction == 'legitimate') {
-            $finalConfidence = 1 - $adjustedConfidence;
-        }
-        
-        if (str_starts_with($finalPrediction, 'phishing')) {
-            $finalConfidence = $adjustedConfidence;
-        }
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
-
+        $ip = session('ip');
+        $id_user = session('user_id') ?? '';
         $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
-            'ip_address' => $request->ip(),
-            'user_id' => auth()->id(), // Automatically gets the logged-in user's ID, or null for guests
+            'ip' => $ip,
+            'id_user' => $id_user ?? '',
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
             'domain' => $data['domain'] ?? [],
@@ -393,13 +376,9 @@ class PhishingController extends Controller
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
             'adjusted_confidence' => $adjustedConfidence,
             'final_prediction' => $finalPrediction,
-            'final_confidence' => $finalConfidence,
             'trusted_domain' => $isTrusted,
         ]);
 
-        $data['final_prediction'] = $finalPrediction;
-        $data['final_confidence'] = $finalConfidence;
-        
         // =================== URL LLM SECTION  ===================
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
         try {
@@ -439,11 +418,7 @@ class PhishingController extends Controller
 
         $data['llm_analysis'] = $llmAnalysis;
 
-        return response()->json($data);
-    }
 
-    public function exportExcel()
-    {
-        return Excel::download(new PhishingReportExport, 'laporan_phishing.xlsx');
+        return response()->json($data);
     }
 }
