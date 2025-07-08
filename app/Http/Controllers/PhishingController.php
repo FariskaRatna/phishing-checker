@@ -194,10 +194,12 @@ class PhishingController extends Controller
 
                 // Adjusted Confidence
                 $adjustedConfidence = $confidence;
-                if ($prediction === 'phishing' && $isTrusted) {
-                    $adjustedConfidence = max(0, $confidence - 0.3);
-                } elseif ($prediction === 'legitimate' && !$isTrusted) {
-                    $adjustedConfidence = max(0, $confidence - 0.1);
+                if ($confidence < 0.96) {
+                    if ($prediction === 'phishing' && $isTrusted) {
+                        $adjustedConfidence = max(0, $confidence - 0.1);
+                    } elseif ($prediction === 'legitimate' && !$isTrusted) {
+                        $adjustedConfidence = max(0, $confidence - 0.1);
+                    }
                 }
 
                 // Final Prediction
@@ -205,6 +207,8 @@ class PhishingController extends Controller
                 if ($adjustedConfidence < 0.5) {
                     $finalPrediction .= '_low_confidence';
                 }
+
+                $finalConfidence = $adjustedConfidence;
 
                 $phishing = Phishing::create([
                     'url' => $url,
@@ -216,6 +220,7 @@ class PhishingController extends Controller
                     'features' => $features,
                     'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
+                    'final_confidence' => $finalConfidence,
                     'trusted_domain' => $isTrusted
                 ]);
 
@@ -258,6 +263,7 @@ class PhishingController extends Controller
                     'confidence' => $confidence,
                     'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
+                    'final_confidence' => $finalConfidence,
                     'trusted_domain' => $isTrusted,
                     'features' => $features,
                     'domain' => $domainStr,
@@ -339,10 +345,11 @@ class PhishingController extends Controller
         });
 
         $confidence = $data['confidence'] ?? 0;
+        $prediction = $data['prediction'] ?? '';
         $phishingProb = $data['phishing_probability'] ?? (1 - ($data['confidence'] ?? 0));
         $adjustedConfidence = $phishingProb;
 
-        if ($confidence < 0.96) {
+        if ($confidence < 0.89) {
             if ($isTrusted) {
                 $adjustedConfidence = max(0, $phishingProb - 0.1);
             } else {
@@ -356,7 +363,13 @@ class PhishingController extends Controller
             $finalPrediction .= '_low_confidence';
         }
 
-        $finalConfidence = 1 - $adjustedConfidence;
+        if ($prediction == 'legitimate') {
+            $finalConfidence = 1 - $adjustedConfidence;
+        }
+        
+        if (str_starts_with($finalPrediction, 'phishing')) {
+            $finalConfidence = $adjustedConfidence;
+        }
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
 
         $phishing = Phishing::create([
