@@ -63,6 +63,8 @@ class PhishingController extends Controller
             $quota = 5 - $quotaumum;
         }
 
+        // var_dump($ip);
+        // die;
         // $quota = 1;
         session(['quota' => $quota]);
 
@@ -170,9 +172,6 @@ class PhishingController extends Controller
         $url = $request->input('url');
 
 
-
-        // var_dump($url);
-        // die;
         // CHECK EMAIL
         if (filter_var($url, FILTER_VALIDATE_EMAIL)) {
             try {
@@ -209,7 +208,7 @@ class PhishingController extends Controller
                         $adjustedConfidence = max(0, $confidence - 0.1);
                     } elseif ($prediction === 'phishing' && !$isTrusted) {
                         $adjustedConfidence = min(1, $confidence + 0.1);
-                    } elseif($prediction === 'legitimate' && $isTrusted) {
+                    } elseif ($prediction === 'legitimate' && $isTrusted) {
                         $adjustedConfidence = min(1, $confidence + 0.1);
                     }
                 }
@@ -377,16 +376,19 @@ class PhishingController extends Controller
         if ($prediction == 'legitimate') {
             $finalConfidence = 1 - $adjustedConfidence;
         }
-        
+
         if (str_starts_with($finalPrediction, 'phishing')) {
             $finalConfidence = $adjustedConfidence;
         }
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
-        $ip = session('ip');
+
+        // $ip = session('ip');
+        $ip = $request->ip();
         $id_user = session('user_id') ?? '';
+        // DB::enableQueryLog();
         $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
-            'ip' => $ip,
+            'ip' =>  $ip,
             'id_user' => $id_user ?? '',
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
@@ -400,6 +402,9 @@ class PhishingController extends Controller
             'final_confidence' => $finalConfidence,
             'trusted_domain' => $isTrusted,
         ]);
+        // dd(DB::getQueryLog());
+        // die;
+
 
         $data['final_prediction'] = $finalPrediction;
         $data['final_confidence'] = $finalConfidence;

@@ -370,54 +370,26 @@
 
 </body>
 <!-- Footer -->
-<footer>
+<footer class="bg-dark text-light py-4">
     <div class="container">
-        <div class="row text-center text-md-start">
-            <div class="col-md-2 mb-3">
-                <img src="https://BUMATARA.com/logo.svg" alt="BUMATARA" height="30"><br>
-                <a href="#" class="d-block mt-2 footer-links">LinkedIn</a>
-                <a href="#" class="d-block footer-links">Contact Us</a>
+        <div class="row align-items-center text-center text-md-start">
+            <!-- Logo dan Social -->
+            <div class="col-md-6 mb-3 mb-md-0">
+                <img src="https://BUMATARA.com/logo.svg" alt="BUMATARA" height="40" class="mb-2">
+                <div>
+                    <a href="#" class="text-light me-3 text-decoration-none">LinkedIn</a>
+                    <a href="#" class="text-light text-decoration-none">Contact Us</a>
+                </div>
             </div>
-            <div class="col-md-2 mb-3 footer-links">
-                <h6>Company</h6>
-                <a href="#">About Us</a><br>
-                <a href="#">Security</a><br>
-                <a href="#">Newsroom</a><br>
-                <a href="#">System Status</a><br>
-                <a href="#">Terms & Conditions</a><br>
-                <a href="#">Privacy Policy</a><br>
-                <a href="#">GDPR</a>
+
+            <!-- Copyright -->
+            <div class="col-md-6 text-center text-md-end">
+                <small class="d-block">Semarang, Indonesia — Copyright © 2025 BUMATARA, Inc.</small>
             </div>
-            <div class="col-md-2 mb-3 footer-links">
-                <h6>BUMATARA</h6>
-                <a href="#">Pricing</a><br>
-                <a href="#">Partners</a><br>
-                <a href="#">Contact</a>
-            </div>
-            <div class="col-md-2 mb-3 footer-links">
-                <h6>Industries</h6>
-                <a href="#">Government</a><br>
-                <a href="#">Legal</a><br>
-                <a href="#">Finance</a><br>
-                <a href="#">Education</a><br>
-                <a href="#">Startups</a><br>
-                <a href="#">NGO</a><br>
-                <a href="#">Healthcare</a>
-            </div>
-            <div class="col-md-4 mb-3 footer-links">
-                <h6>Knowledgebase</h6>
-                <a href="#">Blog</a><br>
-                <a href="#">DMARC setup</a><br>
-                <a href="#">DMARC Reports</a><br>
-                <a href="#">DKIM setup</a><br>
-                <a href="#">SPF setup</a>
-            </div>
-        </div>
-        <div class="text-center mt-4">
-            <small>Semarang, Indonesia — Copyright © 2025 BUMATARA, Inc.</small>
         </div>
     </div>
 </footer>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
