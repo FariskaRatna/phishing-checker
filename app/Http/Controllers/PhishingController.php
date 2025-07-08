@@ -187,18 +187,22 @@ class PhishingController extends Controller
                 $domainStr = (string) ($data['domain'] ?? '');
                 $features = $data['features'] ?? [];
 
-                $trustedDomains = json_decode(file_get_contents(storage_path('app/trusted_domain.json')), true);
+                $trustedDomains = json_decode(file_get_contents(storage_path('app/top100domains.json')), true);
                 $isTrusted = collect($trustedDomains)->contains(function ($trusted) use ($domainStr) {
                     return $domainStr && str_ends_with($domainStr, $trusted);
                 });
 
                 // Adjusted Confidence
                 $adjustedConfidence = $confidence;
-                if ($confidence < 0.96) {
+                if ($confidence < 0.88) {
                     if ($prediction === 'phishing' && $isTrusted) {
                         $adjustedConfidence = max(0, $confidence - 0.1);
                     } elseif ($prediction === 'legitimate' && !$isTrusted) {
                         $adjustedConfidence = max(0, $confidence - 0.1);
+                    } elseif ($prediction === 'phishing' && !$isTrusted) {
+                        $adjustedConfidence = min(1, $confidence + 0.1);
+                    } elseif($prediction === 'legitimate' && $isTrusted) {
+                        $adjustedConfidence = min(1, $confidence + 0.1);
                     }
                 }
 
