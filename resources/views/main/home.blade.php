@@ -204,64 +204,65 @@
                     style="max-width: 250px;">
             </div>
 
-            <div style="max-height: 400px; overflow-y: auto;" class="border rounded p-2">
-                <ul class="list-group" id="urlList">
+            <div class="border rounded shadow-sm p-3"
+                style="max-height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                <ul class="list-group list-group-flush" id="urlList">
                     <!-- Contoh 1 -->
-                    <li class="list-group-item list-group-item-action p-0" data-bs-toggle="modal"
-                        data-bs-target="#urlModal" data-url="https://contoh1.com" data-confidence="85"
-                        data-status="Terverifikasi Aman">
-                        <div class="d-flex">
-                            <div class="flex-grow-1 p-1" style="padding-left: 1rem;">
-                                <div class="fw-semibold text-break" style="padding-left: 1rem;">
-                                    https://contoh1.com
-                                </div>
+                    <li class="list-group-item list-group-item-action p-0 border-0 mb-2 rounded bg-white shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="https://contoh1.com"
+                        data-confidence="85" data-status="Terverifikasi Aman" style="transition: all 0.3s ease;">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1 ps-3 py-2">
+                                <span class="fw-semibold text-dark small">https://contoh1.com</span>
                             </div>
-                            <div class="d-flex align-items-center justify-content-center bg-primary text-white radius1"
-                                style="width: 30%; font-size: 14px;">
-                                Status:<br>
-                                Terverifikasi Aman
+                            <div class="d-flex align-items-center justify-content-center text-white rounded-end"
+                                style="background-color: #0d6efd; width: 30%; min-width: 100px; font-size: 13px;">
+                                <div class="text-center">
+                                    <div class="fw-bold">Aman</div>
+                                    <small>Verified</small>
+                                </div>
                             </div>
                         </div>
                     </li>
 
                     <!-- Contoh 2 -->
-                    <li class="list-group-item list-group-item-action p-0" data-bs-toggle="modal"
-                        data-bs-target="#urlModal" data-url="https://phishing123.com" data-confidence="25"
-                        data-status="Terdeteksi Phishing">
-                        <div class="d-flex">
-                            <div class="flex-grow-1 p-1" style="padding-left: 1rem;">
-                                <div class="fw-semibold text-break" style="padding-left: 1rem;">
-                                    https://phishing123.com
-                                </div>
+                    <li class="list-group-item list-group-item-action p-0 border-0 mb-2 rounded bg-white shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="https://phishing123.com"
+                        data-confidence="25" data-status="Terdeteksi Phishing" style="transition: all 0.3s ease;">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1 ps-3 py-2">
+                                <span class="fw-semibold text-dark small">https://phishing123.com</span>
                             </div>
-                            <div class="d-flex align-items-center justify-content-center bg-warning text-dark radius1"
-                                style="width: 30%; font-size: 14px;">
-                                Status:<br>
-                                Terdeteksi Phishing
+                            <div class="d-flex align-items-center justify-content-center text-dark rounded-end"
+                                style="background-color: #ffc107; width: 30%; min-width: 100px; font-size: 13px;">
+                                <div class="text-center">
+                                    <div class="fw-bold">Phishing</div>
+                                    <small>Detected</small>
+                                </div>
                             </div>
                         </div>
                     </li>
 
                     <!-- Contoh 3 -->
-                    <li class="list-group-item list-group-item-action p-0" data-bs-toggle="modal"
-                        data-bs-target="#urlModal" data-url="https://securebank.id" data-confidence="92"
-                        data-status="Terverifikasi Aman">
-                        <div class="d-flex">
-                            <div class="flex-grow-1 p-1" style="padding-left: 1rem;">
-                                <div class="fw-semibold text-break" style="padding-left: 1rem;">
-                                    https://securebank.id
-                                </div>
+                    <li class="list-group-item list-group-item-action p-0 border-0 mb-2 rounded bg-white shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="https://securebank.id"
+                        data-confidence="92" data-status="Terverifikasi Aman" style="transition: all 0.3s ease;">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1 ps-3 py-2">
+                                <span class="fw-semibold text-dark small">https://securebank.id</span>
                             </div>
-                            <div class="d-flex align-items-center justify-content-center bg-primary text-white radius1"
-                                style="width: 30%; font-size: 14px;">
-                                Status:<br>
-                                Terverifikasi Aman
+                            <div class="d-flex align-items-center justify-content-center text-white rounded-end"
+                                style="background-color: #0d6efd; width: 30%; min-width: 100px; font-size: 13px;">
+                                <div class="text-center">
+                                    <div class="fw-bold">Aman</div>
+                                    <small>Verified</small>
+                                </div>
                             </div>
                         </div>
                     </li>
                 </ul>
-
             </div>
+
         </div>
 
 
