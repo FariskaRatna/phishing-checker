@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,16 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'rule' => 1, // Atur rule default ke 1 agar user bisa login
+        ]);
+
+        // Buat kuota default untuk user baru (misal: 5 untuk paket Free)
+        // Pastikan Anda sudah memiliki model UserQuota atau gunakan DB facade
+        DB::table('user_quota')->insert([
+            'id_user' => $user->id,
+            'quota' => 5, // Quota awal untuk user baru
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         event(new Registered($user));

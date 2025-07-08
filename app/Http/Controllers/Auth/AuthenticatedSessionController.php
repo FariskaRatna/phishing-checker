@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -46,6 +47,17 @@ class AuthenticatedSessionController extends Controller
 
         // Kalau status > 0, lanjutkan login
         $request->session()->regenerate();
+
+        // Ambil data kuota user dari database
+        $userQuota = DB::table('user_quota')->where('id_user', $user->id)->first();
+
+        // Simpan data yang dibutuhkan ke dalam session
+        $request->session()->put([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'quota' => $userQuota->quota ?? 0, // Jika user tidak punya kuota, default 0
+            'ip' => $request->ip()
+        ]);
 
         return redirect('/')->with('welcome', 'Selamat datang, ' . $user->name . '!');
     }

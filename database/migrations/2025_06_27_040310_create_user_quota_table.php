@@ -12,15 +12,12 @@ class CreateUserQuotaTable extends Migration
     public function up(): void
     {
         Schema::create('user_quota', function (Blueprint $table) {
-            $table->id('no'); // primary key auto increment
-            $table->unsignedBigInteger('id_user'); // id dari tabel user
+            $table->id(); // Standar Laravel untuk primary key auto-increment
+            $table->foreignId('id_user')->constrained('users')->onDelete('cascade'); // Relasi ke tabel users
 
             $table->integer('quota')->default(5); // jumlah quota
 
-            $table->timestamp('create_at')->useCurrent(); // waktu pembuatan
-
-            // Jika id_user mengacu ke tabel users:
-            // $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->timestamps(); // Membuat kolom created_at dan updated_at
         });
     }
 
