@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/phishing', [PhishingController::class, 'index2']);
+// Route::get('/phishing', [PhishingController::class, 'index2']);
+Route::get('/export', [PhishingController::class, 'index2']);
 Route::post('/phishing/check', [PhishingController::class, 'check']);
+Route::get('/report/export', [PhishingController::class, 'exportExcel'])->name('phishing.export');
 
 Route::get('/documentation', function () {
     return view('main.documentation');

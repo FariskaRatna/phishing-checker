@@ -10,6 +10,8 @@ use Throwable;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Jenssegers\Agent\Agent;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PhishingReportExport;
 use Illuminate\Support\Facades\DB;
 
 
@@ -137,8 +139,9 @@ class PhishingController extends Controller
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
         $details = @json_decode($response);
 
+        $phishings = Phishing::latest()->paginate(15);
 
-        return view('phishing', [
+        return view('export', [
             'ip' => $ip,
             'city' => $details->city ?? 'Unknown',
             'region' => $details->region ?? 'Unknown',
@@ -147,7 +150,8 @@ class PhishingController extends Controller
             'device' => $agent->device(),
             'platform' => $agent->platform() . ' ' . $agent->version($agent->platform()),
             'browser' => $agent->browser() . ' ' . $agent->version($agent->browser()),
-            'user_agent' => $request->header('User-Agent')
+            'user_agent' => $request->header('User-Agent'),
+            'phishings' => $phishings
         ]);
     }
 
@@ -436,5 +440,10 @@ class PhishingController extends Controller
         $data['llm_analysis'] = $llmAnalysis;
 
         return response()->json($data);
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new PhishingReportExport, 'laporan_phishing.xlsx');
     }
 }
