@@ -202,10 +202,16 @@ class PhishingController extends Controller
 
                 // Adjusted Confidence
                 $adjustedConfidence = $confidence;
-                if ($prediction === 'phishing' && $isTrusted) {
-                    $adjustedConfidence = max(0, $confidence - 0.3);
-                } elseif ($prediction === 'legitimate' && !$isTrusted) {
-                    $adjustedConfidence = max(0, $confidence - 0.1);
+                if ($confidence < 0.88) {
+                    if ($prediction === 'phishing' && $isTrusted) {
+                        $adjustedConfidence = max(0, $confidence - 0.1);
+                    } elseif ($prediction === 'legitimate' && !$isTrusted) {
+                        $adjustedConfidence = max(0, $confidence - 0.1);
+                    } elseif ($prediction === 'phishing' && !$isTrusted) {
+                        $adjustedConfidence = min(1, $confidence + 0.1);
+                    } elseif($prediction === 'legitimate' && $isTrusted) {
+                        $adjustedConfidence = min(1, $confidence + 0.1);
+                    }
                 }
 
                 // Final Prediction
@@ -213,6 +219,8 @@ class PhishingController extends Controller
                 if ($adjustedConfidence < 0.5) {
                     $finalPrediction .= '_low_confidence';
                 }
+
+                $finalConfidence = $adjustedConfidence;
 
                 $phishing = Phishing::create([
                     'url' => $url,
@@ -224,6 +232,7 @@ class PhishingController extends Controller
                     'features' => $features,
                     'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
+                    'final_confidence' => $finalConfidence,
                     'trusted_domain' => $isTrusted
                 ]);
 
@@ -346,23 +355,31 @@ class PhishingController extends Controller
             return $domain && str_ends_with($domain, $trusted);
         });
 
-        $prediction = $data['prediction'] ?? 'phishing';
         $confidence = $data['confidence'] ?? 0;
-        $adjustedConfidence = $confidence;
+        $prediction = $data['prediction'] ?? '';
+        $phishingProb = $data['phishing_probability'] ?? (1 - ($data['confidence'] ?? 0));
+        $adjustedConfidence = $phishingProb;
 
-        if ($prediction === 'phishing' && $isTrusted) {
-            $adjustedConfidence = max(0, $confidence - 0.3);
-        }
-        // Jika model bilang ini legit tapi domain tidak trusted → kurangi sedikit confidence legit
-        elseif ($prediction === 'legitimate' && !$isTrusted) {
-            $adjustedConfidence = max(0, $confidence - 0.1);
+        if ($confidence < 0.89) {
+            if ($isTrusted) {
+                $adjustedConfidence = max(0, $phishingProb - 0.1);
+            } else {
+                $adjustedConfidence = min(1, $phishingProb + 0.1);
+            }
         }
 
-        // Lalu prediksi akhirnya tetap mengacu ke label & confidence
-        $finalPrediction = $prediction;
-        if ($adjustedConfidence < 0.5) {
-            // Jika confidence rendah, kita bisa kasih warning
+        $finalPrediction = $adjustedConfidence >= 0.5 ? 'phishing' : 'legitimate';
+
+        if ($adjustedConfidence >= 0.45 && $adjustedConfidence < 0.55) {
             $finalPrediction .= '_low_confidence';
+        }
+
+        if ($prediction == 'legitimate') {
+            $finalConfidence = 1 - $adjustedConfidence;
+        }
+        
+        if (str_starts_with($finalPrediction, 'phishing')) {
+            $finalConfidence = $adjustedConfidence;
         }
         // Storage::put('debug_extracted.json', json_encode($data['extracted_content']));
         $ip = session('ip');
@@ -380,8 +397,12 @@ class PhishingController extends Controller
             'extracted_content' => json_encode($data['extracted_content'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR),
             'adjusted_confidence' => $adjustedConfidence,
             'final_prediction' => $finalPrediction,
+            'final_confidence' => $finalConfidence,
             'trusted_domain' => $isTrusted,
         ]);
+
+        $data['final_prediction'] = $finalPrediction;
+        $data['final_confidence'] = $finalConfidence;
 
         // =================== URL LLM SECTION  ===================
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
