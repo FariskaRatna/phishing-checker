@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('phishings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('ip_address', 45)->nullable();
-
+            $table->foreignId('id_user')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('ip', 45)->nullable();
             $table->string('url');
             $table->string('prediction');
             $table->float('confidence');

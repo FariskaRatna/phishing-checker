@@ -58,7 +58,7 @@ class PhishingController extends Controller
                AND p.created_at BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01')
                                    AND LAST_DAY(CURDATE())",
                 [$ip]
-            );
+            ) ?? 0;
 
             $quota = 5 - $quotaumum;
         }
