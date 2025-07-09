@@ -63,9 +63,7 @@ class PhishingController extends Controller
             $quota = 5 - $quotaumum;
         }
 
-        // var_dump($ip);
-        // die;
-        // $quota = 1;
+
         session(['quota' => $quota]);
 
         $response = @file_get_contents("http://ipinfo.io/{$ip}/json");
@@ -118,7 +116,20 @@ class PhishingController extends Controller
             );
         }
 
+        $dataurl = DB::select("
+        SELECT p.url, p.prediction, p.confidence, p.domain, p.llm_analysis
+        FROM phishings p
+        INNER JOIN (
+            SELECT url, MAX(created_at) AS max_created_at
+            FROM phishings
+            GROUP BY url
+        ) latest ON p.url = latest.url AND p.created_at = latest.max_created_at
+        ORDER BY p.created_at DESC
+        LIMIT 5;
+        ");
+
         return view('main.home', [
+            'dataurl' => $dataurl,
             'ip' => $ip,
             'city' => $details->city ?? 'Unknown',
             'region' => $details->region ?? 'Unknown',

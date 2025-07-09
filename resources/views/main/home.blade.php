@@ -5,8 +5,8 @@
 <!-- Hero Section -->
 <section class="hero">
     <h2 class="mb-3">🔍 DMARC</h2>
-    <p>Nama: {{ session('user_id') }}</p>
-    <p>ip: {{ session('ip') }}</p>
+    <p>Domain-based Message Authentication, Reporting, and Conformance</p>
+
     <h1 class="display-5 fw-bold">Phishing URL checker</h1>
     <p class="lead mb-4">Our phishing URL checker detects if a URL is malicious or contains a phishing link.</p>
     <div class="url-checker-box">
@@ -129,7 +129,7 @@
 </div>
 
 <div class="container my-5 text-center">
-    <!-- Angka total -->
+
     <h2 class="fw-bold mb-3">
         Sudah sebanyak <span id="countUp" class="text-primary">0</span> URL diperiksa dalam website ini
     </h2>
@@ -185,7 +185,11 @@
     <div class="row">
         <!-- Grafik Ringkasan -->
         <div class="col-md-4 text-center" style=" box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); padding: 10px;">
-            <h4 class="fw-bold">Riwayat URL Hari Ini</h4>
+            <!-- Angka total -->
+            <input type="hidden" id="totalAman" value="840">
+            <input type="hidden" id="totalPhishing" value="320">
+
+            <h4 class="fw-bold">Riwayat URL</h4>
             <div style="position: relative; width: 220px; height: 220px; margin: auto;">
                 <canvas id="overallChart" width="220" height="220"></canvas>
                 <div id="chartCenterText"
@@ -207,59 +211,44 @@
             <div class="border rounded shadow-sm p-3"
                 style="max-height: 400px; overflow-y: auto; background-color: #f8f9fa;">
                 <ul class="list-group list-group-flush" id="urlList">
-                    <!-- Contoh 1 -->
-                    <li class="list-group-item list-group-item-action p-0 border-0 mb-2 rounded bg-white shadow-sm"
-                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="https://contoh1.com"
-                        data-confidence="85" data-status="Terverifikasi Aman" style="transition: all 0.3s ease;">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1 ps-3 py-2">
-                                <span class="fw-semibold text-dark small">https://contoh1.com</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-center text-white rounded-end"
-                                style="background-color: #0d6efd; width: 30%; min-width: 100px; font-size: 13px;">
-                                <div class="text-center">
-                                    <div class="fw-bold">Aman</div>
-                                    <small>Verified</small>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
 
-                    <!-- Contoh 2 -->
-                    <li class="list-group-item list-group-item-action p-0 border-0 mb-2 rounded bg-white shadow-sm"
-                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="https://phishing123.com"
-                        data-confidence="25" data-status="Terdeteksi Phishing" style="transition: all 0.3s ease;">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1 ps-3 py-2">
-                                <span class="fw-semibold text-dark small">https://phishing123.com</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-center text-dark rounded-end"
-                                style="background-color: #ffc107; width: 30%; min-width: 100px; font-size: 13px;">
-                                <div class="text-center">
-                                    <div class="fw-bold">Phishing</div>
-                                    <small>Detected</small>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
+                    @foreach ($dataurl as $url)
+                    @php
+                    // Tentukan status dan warna berdasarkan confidence
+                    if ($url->prediction == 'safe' || $url->confidence >= 70) {
+                    $status = 'Terverifikasi Aman';
+                    $badgeColor = '#0d6efd'; // biru
+                    $textColor = 'text-white';
+                    $label = 'Aman';
+                    $subLabel = 'Verified';
+                    } else {
+                    $status = 'Terdeteksi Phishing';
+                    $badgeColor = '#ffc107'; // kuning
+                    $textColor = 'text-dark';
+                    $label = 'Phishing';
+                    $subLabel = 'Detected';
+                    }
+                    @endphp
 
-                    <!-- Contoh 3 -->
                     <li class="list-group-item list-group-item-action p-0 border-0 mb-2 rounded bg-white shadow-sm"
-                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="https://securebank.id"
-                        data-confidence="92" data-status="Terverifikasi Aman" style="transition: all 0.3s ease;">
+                        data-bs-toggle="modal" data-bs-target="#urlModal" data-url="{{ $url->url }}"
+                        data-confidence="{{ $url->confidence }}" data-status="{{ $status }}"
+                        data-analysis="{{ e($url->llm_analysis) }}" style="transition: all 0.3s ease;">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1 ps-3 py-2">
-                                <span class="fw-semibold text-dark small">https://securebank.id</span>
+                                <span class="fw-semibold text-dark small">{{ $url->url }}</span>
                             </div>
-                            <div class="d-flex align-items-center justify-content-center text-white rounded-end"
-                                style="background-color: #0d6efd; width: 30%; min-width: 100px; font-size: 13px;">
+                            <div class="d-flex align-items-center justify-content-center {{ $textColor }} rounded-end"
+                                style="background-color: {{ $badgeColor }}; width: 30%; min-width: 100px; font-size: 13px;">
                                 <div class="text-center">
-                                    <div class="fw-bold">Aman</div>
-                                    <small>Verified</small>
+                                    <div class="fw-bold">{{ $label }}</div>
+                                    <small>{{ $subLabel }}</small>
                                 </div>
                             </div>
                         </div>
                     </li>
+                    @endforeach
+
                 </ul>
             </div>
 
@@ -271,25 +260,40 @@
 
 <!-- Modal Popup -->
 <div class="modal fade" id="urlModal" tabindex="-1" aria-labelledby="urlModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- modal-lg biar lebih lebar -->
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="urlModalLabel">Detail Pemeriksaan URL</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body">
-                <p id="urlText" class="fw-bold"></p>
-                <div style="position: relative; width: 220px; height: 220px; margin: auto;">
 
+
+                <!-- Confidence Chart -->
+                <div style="position: relative; width: 220px; height: 220px; margin: auto;">
                     <canvas id="confidenceChart" width="100" height="100"></canvas>
                 </div>
+                <!-- URL -->
+                <p id="urlText" class="fw-bold text-primary mb-2"></p>
+                <!-- Status -->
                 <div class="mt-3">
-                    <p id="urlStatus" class="text-muted"></p>
+                    <p id="urlStatus" class="text-muted fw-semibold"></p>
+                </div>
+
+                <!-- LLM Analysis -->
+                <hr>
+                <div class="mt-2">
+                    <h6 class="fw-bold">Analisis Lengkap</h6>
+                    <div id="urlAnalysis" class="small text-muted" style="max-height: 250px; overflow-y: auto;">
+                        <!-- Analisis panjang akan dimasukkan dengan JS -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">

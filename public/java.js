@@ -12,8 +12,10 @@ document.querySelectorAll('.accordion-button').forEach(button => {
 });
 
 
-const totalAman = 90;
-const totalPhishing = 30;
+// Ambil nilai dari elemen hidden
+const totalAman = parseInt(document.getElementById('totalAman').value, 10);
+const totalPhishing = parseInt(document.getElementById('totalPhishing').value, 10);
+
 const total = totalAman + totalPhishing;
 
 const ctx = document.getElementById('overallChart').getContext('2d');
@@ -43,6 +45,17 @@ new Chart(ctx, {
 // Set center text secara dinamis jika diperlukan
 document.getElementById('chartCenterText').innerText = `${total} URL`;
 
+//Bagian Result Respons
+function formatLlmAnalysis(text) {
+    if (!text) {
+        return 'Analisis tidak tersedia.';
+    }
+    // 1. Replace markdown-style bold (**text**) with <strong> tags
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // 2. Replace newlines with <br> tags for proper HTML line breaks
+    formattedText = formattedText.replace(/\n/g, '<br>');
+    return formattedText;
+}
 
 // Modal: saat list URL diklik
 const urlModal = document.getElementById('urlModal');
@@ -51,10 +64,14 @@ urlModal.addEventListener('show.bs.modal', function (event) {
     const url = button.getAttribute('data-url');
     const confidence = button.getAttribute('data-confidence');
     const status = button.getAttribute('data-status');
+    let analysis = button.getAttribute('data-analysis');
+    analysis = formatLlmAnalysis(analysis);
 
-    // Tampilkan URL dan status
+
+    // Tampilkan URL, status, dan analisis
     document.getElementById('urlText').textContent = url;
     document.getElementById('urlStatus').textContent = `Status: ${status}`;
+    document.getElementById('urlAnalysis').innerHTML = analysis; // tampilkan analisis panjang
 
     // Hancurkan chart sebelumnya jika ada
     if (window.confChart) window.confChart.destroy();
@@ -72,6 +89,7 @@ urlModal.addEventListener('show.bs.modal', function (event) {
         }
     });
 });
+
 
 
 function animateCountUp(id, target, duration) {
@@ -93,17 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-//Bagian Result Respons
-function formatLlmAnalysis(text) {
-    if (!text) {
-        return 'Analisis tidak tersedia.';
-    }
-    // 1. Replace markdown-style bold (**text**) with <strong> tags
-    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    // 2. Replace newlines with <br> tags for proper HTML line breaks
-    formattedText = formattedText.replace(/\n/g, '<br>');
-    return formattedText;
-}
+
 
 document.getElementById('singleForm').onsubmit = async function (e) {
     e.preventDefault();
