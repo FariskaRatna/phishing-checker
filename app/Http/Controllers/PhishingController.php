@@ -389,7 +389,7 @@ class PhishingController extends Controller
         $phishing = Phishing::create([
             'url' => $data['url'] ?? $url,
             'ip' =>  $ip,
-            'id_user' => $id_user ?? '',
+            'id_user' => is_numeric($id_user) ? (int)$id_user : null,
             'prediction' => $data['prediction'] ?? '',
             'confidence' => $data['confidence'] ?? 0,
             'domain' => $data['domain'] ?? [],
