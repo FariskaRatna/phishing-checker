@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Phishing URL Checker - BUMATARA</title>
+    <link rel="icon" href="{{ asset('images/icon-bumatara.png') }}" type="image/x-icon">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .hero {
@@ -100,7 +102,10 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm position-fixed top-0 start-0 w-100 z-3">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">BUMATARA</a>
+            <!-- <a class="navbar-brand fw-bold" href="/">BUMATARA</a> -->
+             <a class="navbar-brand" href="/">
+                <img src="{{ asset('images/logo-bumatara.png') }}" alt="BUMATARA Logo" style="height: 50px;">
+            </a>
 
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -375,7 +380,7 @@
         <div class="row align-items-center text-center text-md-start">
             <!-- Logo dan Social -->
             <div class="col-md-6 mb-3 mb-md-0">
-                <img src="https://BUMATARA.com/logo.svg" alt="BUMATARA" height="40" class="mb-2">
+                <img src="{{ asset('images/bumatara-bw.png') }}" alt="BUMATARA" height="40" class="mb-2">
                 <div>
                     <a href="#" class="text-light me-3 text-decoration-none">LinkedIn</a>
                     <a href="#" class="text-light text-decoration-none">Contact Us</a>
