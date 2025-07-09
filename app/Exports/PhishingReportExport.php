@@ -16,7 +16,7 @@ class PhishingReportExport implements FromCollection, WithHeadings, WithMapping
     public function collection()
     {
         return Phishing::query()
-        ->leftJoin('ip_logs', 'phishings.ip_address', '=', 'ip_logs.ip')
+        ->leftJoin('ip_logs', 'phishings.ip', '=', 'ip_logs.ip')
         ->select(
             'phishings.url',
             'phishings.final_prediction',
