@@ -103,7 +103,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm position-fixed top-0 start-0 w-100 z-3">
         <div class="container">
             <!-- <a class="navbar-brand fw-bold" href="/">BUMATARA</a> -->
-             <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="/">
                 <img src="{{ asset('images/logo-bumatara.png') }}" alt="BUMATARA Logo" style="height: 50px;">
             </a>
 
@@ -390,10 +390,12 @@
             <!-- Copyright -->
             <div class="col-md-6 text-center text-md-end">
                 <small class="d-block">Semarang, Indonesia — Copyright © 2025 BUMATARA, Inc.</small>
+                <small class="d-block">Created by: Rizki Abdillah, Fariska Ratna Fauziah, Malinda Ratnaduhita</small>
             </div>
         </div>
     </div>
 </footer>
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
