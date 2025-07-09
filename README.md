@@ -1,4 +1,6 @@
-# <img src="public/images/logo-bumatara.png" alt="Bumatara Logo" width="120" />
+<div align="center">
+  <img src="public/images/logo-bumatara.png" alt="Bumatara Logo" width="220" />
+</div>
 
 # Bumatara: Phishing URL Checker
 
