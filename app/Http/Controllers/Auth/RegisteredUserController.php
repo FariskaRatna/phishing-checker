@@ -51,7 +51,7 @@ class RegisteredUserController extends Controller
         // Pastikan Anda sudah memiliki model UserQuota atau gunakan DB facade
         DB::table('user_quota')->insert([
             'id_user' => $user->id,
-            'quota' => 5, // Quota awal untuk user baru
+            'quota' => 15, // Quota awal untuk user baru
             'created_at' => now(),
             'updated_at' => now(),
         ]);

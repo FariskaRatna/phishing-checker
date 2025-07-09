@@ -17,7 +17,9 @@
         <div class="bg-white text-dark p-4 pricing-card h-100">
           <h4 class="fw-bold">Paket Free</h4>
           <ul class="list-unstyled mt-3 mb-4">
-            <li>✔️ Cek hingga 5 URL / hari</li>
+            <li>✔️ Cek hingga 15
+              URL / bulan
+            </li>
             <li>✔️ Deteksi phishing dasar</li>
             <li>✔️ Laporan singkat</li>
             <li>✔️ Enkripsi koneksi (HTTPS)</li>
