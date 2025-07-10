@@ -232,14 +232,17 @@ class PhishingController extends Controller
 
                 $finalConfidence = $adjustedConfidence;
 
+                $ip = $request->ip();
+                $id_user = session('user_id') ?? '';
+
                 $phishing = Phishing::create([
                     'url' => $url,
-                    'prediction' => $prediction,
-                    'domain' => $domain,
-                    'features' => $features,
-                    'confidence' => $confidence,
+                    'ip' => $ip,
+                    'id_user' => is_numeric($id_user) ? (int)$id_user : null,
+                    'prediction' => $data['prediction'] ?? '',
+                    'confidence' => $data['confidence'] ?? 0,
                     'domain' => $domainStr,
-                    'features' => $features,
+                    'features' => $data['features'] ?? [],
                     'adjusted_confidence' => $adjustedConfidence,
                     'final_prediction' => $finalPrediction,
                     'final_confidence' => $finalConfidence,
@@ -250,15 +253,15 @@ class PhishingController extends Controller
                 $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
                 try {
                     $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
-                    $llmResponse = Http::timeout(60)->post($llmAPI, [
+                    $llmResponse = Http::timeout(30)->post($llmAPI, [
                         'context' => [
                             'input_type' => 'email',
                             'value' => $url,
-                            'prediction' => $prediction,
-                            'confidence' => $confidence,
+                            'prediction' => $data['prediction'] ?? '',
+                            'confidence' => $data['confidence'] ?? 0,
                             'adjusted_confidence' => $adjustedConfidence,
                             'trusted_domain' => $isTrusted,
-                            #'features' => $features
+                            'final_prediction' => $finalPrediction,
                         ]
                     ]);
 
@@ -277,19 +280,13 @@ class PhishingController extends Controller
                 }
 
                 $phishing->update(['llm_analysis' => $llmAnalysis]);
+                
+                $data['llm_analysis'] = $llmAnalysis;
+                $data['final_prediction'] = $finalPrediction;
+                $data['final_confidence'] = $finalConfidence;
 
-                return response()->json([
-                    'input_type' => 'email',
-                    'url' => $url,
-                    'prediction' => $prediction,
-                    'confidence' => $confidence,
-                    'adjusted_confidence' => $adjustedConfidence,
-                    'final_prediction' => $finalPrediction,
-                    'trusted_domain' => $isTrusted,
-                    'features' => $features,
-                    'domain' => $domainStr,
-                    'llm_analysis' => $llmAnalysis
-                ]);
+                return response()->json($data);
+                
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Gagal mengirim permintaan ke Flask API Email: ' . $e->getMessage()], 500);
             }
@@ -424,7 +421,7 @@ class PhishingController extends Controller
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
         try {
             $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
-            $llmResponse = Http::timeout(60)->post($llmAPI, [
+            $llmResponse = Http::timeout(30)->post($llmAPI, [
                 'context' => [
                     'input_type' => 'url',
                     'prediction' => $data['prediction'] ?? '',
