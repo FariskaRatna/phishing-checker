@@ -184,21 +184,21 @@
 <div class="container my-5">
     <div class="row">
         <!-- Grafik Ringkasan -->
-        <div class="col-md-4 text-center" style=" box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); padding: 10px;">
+        <div class="col-md-4 text-center shadow-sm rounded p-3 bg-white">
             <!-- Angka total -->
             <input type="hidden" id="totalAman" value="840">
             <input type="hidden" id="totalPhishing" value="320">
 
-            <h4 class="fw-bold">Riwayat URL</h4>
-            <div style="position: relative; width: 220px; height: 220px; margin: auto;">
+            <h4 class="fw-bold mb-4">Riwayat URL</h4>
+            <div class="position-relative mx-auto" style="width: 220px; height: 220px;">
                 <canvas id="overallChart" width="220" height="220"></canvas>
                 <div id="chartCenterText"
-                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                                                                                                                                                        font-weight: 600; font-size: 20px; color: #212529;">
+                    class="position-absolute top-50 start-50 translate-middle fw-semibold fs-5 text-dark">
                     120 URL
                 </div>
             </div>
         </div>
+
 
 
         <div class="col-md-8" style="padding: 20px; ">

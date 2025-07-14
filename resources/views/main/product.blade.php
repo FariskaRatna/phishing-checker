@@ -153,36 +153,7 @@
   </div>
 </section>
 
-<section class="py-5 bg-light">
-  <div class="container">
-    <h2 class="text-center fw-bold mb-4">Bagaimana Cara Kerja Produk Kami?</h2>
-    <div class="row text-center">
-      <div class="col-md-4 mb-4">
-        <div class="p-4 border rounded shadow-sm">
-          <h5 class="fw-bold">1️⃣ Validasi URL</h5>
-          <p>Memastikan URL memiliki struktur yang valid dan aman untuk diproses sebelum dianalisis lebih
-            lanjut.</p>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="p-4 border rounded shadow-sm">
-          <h5 class="fw-bold">2️⃣ Pengecekan Database Phishing</h5>
-          <p>URL dicocokkan dengan database phishing global seperti PhishTank, Google Safe Browsing, dan
-            database internal.</p>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="p-4 border rounded shadow-sm">
-          <h5 class="fw-bold">3️⃣ Analisis AI & Machine Learning</h5>
-          <p>Model AI mendeteksi pola phishing berdasarkan struktur domain, URL pendek, karakteristik
-            mencurigakan, hingga metadata URL.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="py-5 bg-light">
+<section class="py-5 bg-dark text-light">
   <div class="container">
     <h2 class="text-center fw-bold mb-4">Kenapa Memilih Produk Kami?</h2>
     <div class="row text-center">
@@ -215,7 +186,7 @@
   </div>
 </section>
 
-<section class="py-5 bg-dark text-light">
+<section class="py-5 ">
   <div class="container">
     <h2 class="text-center fw-bold mb-4">Apa Kata Pengguna Kami?</h2>
     <div class="row g-4">
@@ -223,20 +194,20 @@
         <div class="p-4 border rounded h-100">
           <p>"Sejak menggunakan layanan ini, tim kami berhasil mengurangi insiden klik link phishing hingga
             95%!"</p>
-          <h6 class="mt-3 fw-bold">— PT SecureTech</h6>
+          <h6 class="mt-3 fw-bold">— PT SecureTech(Dummy)</h6>
         </div>
       </div>
       <div class="col-md-4">
         <div class="p-4 border rounded h-100">
           <p>"API-nya mudah diintegrasikan ke sistem internal kami. Sangat membantu dan cepat."</p>
-          <h6 class="mt-3 fw-bold">— Tech Innovate</h6>
+          <h6 class="mt-3 fw-bold">— Tech Innovate(Dummy)</h6>
         </div>
       </div>
       <div class="col-md-4">
         <div class="p-4 border rounded h-100">
           <p>"Dashboard-nya sangat informatif. Bisa pantau ancaman phishing secara real-time dengan sangat
             mudah."</p>
-          <h6 class="mt-3 fw-bold">— CyberShield Indonesia</h6>
+          <h6 class="mt-3 fw-bold">— CyberShield Indonesia(Dummy)</h6>
         </div>
       </div>
     </div>

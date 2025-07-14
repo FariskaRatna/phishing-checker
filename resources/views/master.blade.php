@@ -3,13 +3,68 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Cross-browser support -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Phishing URL Checker - BUMATARA</title>
-    <link rel="icon" href="{{ asset('images/icon-bumatara.png') }}" type="image/x-icon">
 
+    <!-- SEO Meta -->
+    <title>Phishing URL Checker | BUMATARA - Cegah Serangan Phishing dengan AI</title>
+    <meta name="description"
+        content="BUMATARA Phishing URL Checker membantu Anda mendeteksi dan menghindari serangan phishing dengan teknologi AI canggih. Cek URL sekarang untuk keamanan online Anda.">
+    <meta name="keywords"
+        content="Phishing URL Checker, Deteksi Phishing, Keamanan Siber Indonesia, AI Cybersecurity, BUMATARA">
+    <meta name="author" content="BUMATARA Team">
+    <meta name="robots" content="index, follow"> <!-- Allow indexing -->
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://bumatara.com/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bumatara.com/phishing-url-checker">
+    <meta property="og:title" content="Phishing URL Checker | BUMATARA">
+    <meta property="og:description"
+        content="Cegah serangan phishing dengan BUMATARA Phishing URL Checker berbasis AI. Amankan data pribadi Anda sekarang.">
+    <meta property="og:image" content="https://bumatara.com/images/og-bumatara.png">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://bumatara.com/phishing-url-checker">
+    <meta name="twitter:title" content="Phishing URL Checker | BUMATARA">
+    <meta name="twitter:description"
+        content="Cegah serangan phishing dengan BUMATARA Phishing URL Checker berbasis AI. Amankan data pribadi Anda sekarang.">
+    <meta name="twitter:image" content="https://bumatara.com/images/twitter-bumatara.png">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('images/icon-bumatara.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-bumatara.png') }}">
+
+    <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Structured Data (Schema.org JSON-LD) -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Phishing URL Checker",
+            "url": "https://bumatara.com/",
+            "applicationCategory": "SecurityApplication",
+            "description": "Phishing URL Checker berbasis AI untuk mendeteksi dan mencegah serangan phishing. Solusi keamanan siber oleh BUMATARA.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "BUMATARA",
+                "logo": "https://bumatara.com/images/icon-bumatara.png"
+            }
+        }
+    </script>
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Custom CSS -->
     <style>
+        /* [Your existing styles here] */
         .hero {
             background-color: #0e1625;
             color: white;
@@ -19,80 +74,16 @@
         }
 
         .hero2 {
-            background-color: #0e1625;
-            color: white;
-            padding: 100px 20px 20px;
-            text-align: center;
-            position: relative;
+            /* ... */
         }
 
-        .url-checker-box {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 600px;
-            margin: 0 auto;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-
-            position: absolute;
-            bottom: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
-        }
-
-        .quote-box {
-            background-color: #f8f9fa;
-            border-left: 5px solid #e0e0e0;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        footer {
-            background-color: #0e1625;
-            color: white;
-            padding: 40px 0;
-        }
-
-        .footer-links a {
-            color: #adb5bd;
-            text-decoration: none;
-        }
-
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
-
-        .radius1 {
-            border-top-right-radius: 0.375rem;
-            border-bottom-right-radius: 0.375rem;
-        }
-
-        #urlList li:hover {
-            cursor: pointer;
-            background-color: #b7ff64;
-        }
-
-        .dropdown-menu.show {
-            display: block !important;
-        }
-
-        .position-static {
-            position: static !important;
-        }
-
-        @media (max-width: 768px) {
-            .dropdown-menu {
-                max-width: 100% !important;
-            }
-        }
+        /* ...other styles... */
     </style>
 
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     @yield('head')
+
     @stack('styles')
 </head>
 

@@ -8,39 +8,60 @@
 @section('main-panel')
 
 <!-- About Section -->
-<section class="py-5 mt-5 bg-dark text-white">
-  <div class="container">
-    <div class="row align-items-center">
+<section class="py-5 mt-5 bg-dark text-white " style="
+         background: url('{{ asset('images/benner1.jpg') }}') center center / cover no-repeat;
+         position: relative;
+         overflow: hidden;
+         
+       ">
+  <div style="
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background-color: rgba(0, 0, 0, 0.4);
+          z-index: 1;
+        "></div>
+  <div class="container rounded  p-4">
+    <!-- Overlay agar teks lebih kontras -->
+
+
+    <div class="row align-items-center position-relative" style="z-index: 2;">
       <!-- Image -->
       <div class="col-md-5 text-center mb-4 mb-md-0">
-        <img src="{{asset('images/img-about3.png')}}" class="img-fluid rounded shadow" alt="Ilustrasi Deteksi Phishing" style="max-width: 350px;" />
+
+        <img src="{{ asset('images/bumatara-shadow1.png') }}" class="img-fluid rounded "
+          alt="Ilustrasi Deteksi Phishing" style="width:200px; " />
       </div>
       <!-- Text -->
       <div class="col-md-7">
         <h1 class="fw-bold mb-3">Lindungi Dirimu dari Phishing!</h1>
         <p class="lead">
-          Bumatara membantu masyarakat Indonesia mengenali dan menghindari serangan phishing dengan teknologi deteksi canggih berbasis AI.
+          Bumatara membantu masyarakat Indonesia mengenali dan menghindari serangan phishing dengan teknologi
+          deteksi canggih berbasis AI.
         </p>
-        <p class="text mt-3 fw-semibold">
-          Kami adalah tim profesional di bidang keamanan siber yang berdedikasi untuk menciptakan solusi praktis dalam melindungi masyarakat dari ancaman siber, terutama serangan phishing.
+        <p class="mt-3 fw-semibold">
+          Kami adalah tim profesional di bidang keamanan siber yang berdedikasi untuk menciptakan solusi
+          praktis dalam melindungi masyarakat dari ancaman siber, terutama serangan phishing.
         </p>
       </div>
     </div>
   </div>
 </section>
 
+
 <!-- Visi Misi Section -->
 <section class="py-5 bg-light">
   <div class="container">
     <div class="row align-items-center">
       <!-- Ilustrasi -->
-      <div class="col-md-6 mb-4 mb-md-0 text-center">
-        <img src="{{asset('images/img-about2.jpg')}}" alt="Visi Misi" class="img-fluid rounded" style="max-width: 450px;" />
+      <div class="col-md-6  mb-md-0 text-center">
+        <img src="{{asset('images/globe1.png')}}" alt="Visi Misi" class="img-fluid rounded"
+          style="max-width: 450px;" />
       </div>
       <!-- Teks -->
       <div class="col-md-6"">
-        <h3 class="fw-bold mb-3">Visi & Misi Bumatara</h3>
-        <p><strong>Visi:</strong> Menjadi garda terdepan dalam melindungi masyarakat Indonesia dari kejahatan siber melalui teknologi deteksi phishing yang cerdas dan adaptif.</p>
+        <h3 class=" fw-bold mb-3">Visi & Misi Bumatara</h3>
+        <p><strong>Visi:</strong> Menjadi garda terdepan dalam melindungi masyarakat Indonesia dari kejahatan
+          siber melalui teknologi deteksi phishing yang cerdas dan adaptif.</p>
         <p><strong>Misi:</strong></p>
         <ul class="list-unstyled">
           <li>🔐 Mengembangkan sistem deteksi phishing berbasis AI dengan akurasi tinggi.</li>
@@ -54,20 +75,20 @@
 </section>
 
 <!-- Komitmen Section -->
-<section class="py-5 text-center bg-white"
-  <div class="container">
-    <h3 class="fw-bold">Komitmen Kami</h3>
-    <p class="mt-3">
-      Di era serba digital, kepercayaan adalah kunci. Kami berkomitmen untuk memberikan layanan deteksi URL phishing yang cepat, akurat, dan dapat diandalkan.
-    </p>
-    <p>
-      Komitmen ini kami wujudkan dalam inovasi berkelanjutan dan respons cepat terhadap ancaman baru.
-    </p>
+<section class="py-5 text-center bg-dark text-light" <div class="container">
+  <h3 class="fw-bold">Komitmen Kami</h3>
+  <p class="mt-3">
+    Di era serba digital, kepercayaan adalah kunci. Kami berkomitmen untuk memberikan layanan deteksi URL phishing
+    yang cepat, akurat, dan dapat diandalkan.
+  </p>
+  <p>
+    Komitmen ini kami wujudkan dalam inovasi berkelanjutan dan respons cepat terhadap ancaman baru.
+  </p>
   </div>
 </section>
 
 <!-- Our Value Section -->
-<section class="py-5 bg-light text-center">
+<section class="py-5 bg-dark text-light text-center">
   <div class="container">
     <h4 class="fw-bold mb-4">Nilai-Nilai Bumatara</h4>
     <div class="d-flex flex-wrap justify-content-center gap-3">
@@ -138,24 +159,23 @@
   });
 </script>
 <script>
-function animateValue(id, end, duration, suffix = '') {
-  let obj = document.getElementById(id);
-  let start = 0;
-  let range = end - start;
-  let increment = end > start ? 1 : -1;
-  let stepTime = Math.abs(Math.floor(duration / range));
-  let current = start;
-  let timer = setInterval(function() {
-    current += increment;
-    obj.textContent = current.toLocaleString() + suffix;
-    if (current == end) clearInterval(timer);
-  }, stepTime);
-}
-document.addEventListener('DOMContentLoaded', function() {
-  animateValue('stat1', 200, 1200, '+');
-  animateValue('stat2', 95, 1000, '%');
-  animateValue('stat3', 10, 1000, '');
-});
+  function animateValue(id, end, duration, suffix = '') {
+    let obj = document.getElementById(id);
+    let start = 0;
+    let range = end - start;
+    let increment = end > start ? 1 : -1;
+    let stepTime = Math.abs(Math.floor(duration / range));
+    let current = start;
+    let timer = setInterval(function() {
+      current += increment;
+      obj.textContent = current.toLocaleString() + suffix;
+      if (current == end) clearInterval(timer);
+    }, stepTime);
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    animateValue('stat1', 200, 1200, '+');
+    animateValue('stat2', 95, 1000, '%');
+    animateValue('stat3', 10, 1000, '');
+  });
 </script>
 @endpush
-
