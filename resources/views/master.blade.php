@@ -62,9 +62,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Custom CSS -->
     <style>
-        /* [Your existing styles here] */
         .hero {
             background-color: #0e1625;
             color: white;
@@ -74,10 +72,75 @@
         }
 
         .hero2 {
-            /* ... */
+            background-color: #0e1625;
+            color: white;
+            padding: 100px 20px 20px;
+            text-align: center;
+            position: relative;
         }
 
-        /* ...other styles... */
+        .url-checker-box {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .quote-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #0e1625;
+            color: white;
+            padding: 40px 0;
+        }
+
+        .footer-links a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .radius1 {
+            border-top-right-radius: 0.375rem;
+            border-bottom-right-radius: 0.375rem;
+        }
+
+        #urlList li:hover {
+            cursor: pointer;
+            background-color: #b7ff64;
+        }
+
+        .dropdown-menu.show {
+            display: block !important;
+        }
+
+        .position-static {
+            position: static !important;
+        }
+
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                max-width: 100% !important;
+            }
+        }
     </style>
 
     <!-- JS -->
