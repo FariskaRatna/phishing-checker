@@ -42,22 +42,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <!-- Structured Data (Schema.org JSON-LD) -->
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Phishing URL Checker",
-            "url": "https://bumatara.com/",
-            "applicationCategory": "SecurityApplication",
-            "description": "Phishing URL Checker berbasis AI untuk mendeteksi dan mencegah serangan phishing. Solusi keamanan siber oleh BUMATARA.",
-            "publisher": {
-                "@type": "Organization",
-                "name": "BUMATARA",
-                "logo": "https://bumatara.com/images/icon-bumatara.png"
-            }
-        }
-    </script>
+
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
