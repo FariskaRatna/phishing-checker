@@ -188,7 +188,7 @@ class PhishingController extends Controller
             try {
                 Log::info('Mengirim permintaan ke Flask API Email', ['email' => $url]);
 
-                $response = Http::timeout(30)->post('http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5001/predict', ['email' => $url]);
+                $response = Http::timeout(30)->post('ec2-47-129-35-192.ap-southeast-1.compute.amazonaws.com:8080/email-predict', ['email' => $url]);
 
                 if ($response->failed()) {
                     Log::error('Flask API Email gagal', [
@@ -252,8 +252,8 @@ class PhishingController extends Controller
                 // =================== EMAIL LLM SECTION ===================
                 $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
                 try {
-                    $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
-                    $llmResponse = Http::timeout(30)->post($llmAPI, [
+                    $llmAPI = 'ec2-47-129-35-192.ap-southeast-1.compute.amazonaws.com:8080/llm-analyzer';
+                    $llmResponse = Http::timeout(40)->post($llmAPI, [
                         'context' => [
                             'input_type' => 'email',
                             'value' => $url,
@@ -306,7 +306,7 @@ class PhishingController extends Controller
             // Log the request
             Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
 
-            $response = Http::timeout(30)->post('http://ec2-34-229-96-108.compute-1.amazonaws.com:8080/predict', ['url' => $url]);
+            $response = Http::timeout(30)->post('ec2-47-129-35-192.ap-southeast-1.compute.amazonaws.com:8080/url-predict', ['url' => $url]);
 
             // Log the raw response for debugging
             Log::info('Flask API Response', [
@@ -420,9 +420,10 @@ class PhishingController extends Controller
         // =================== URL LLM SECTION  ===================
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
         try {
-            $llmAPI = 'http://ec2-3-27-187-142.ap-southeast-2.compute.amazonaws.com:5002/llm-analyze';
-            $llmResponse = Http::timeout(30)->post($llmAPI, [
+            $llmAPI = 'ec2-47-129-35-192.ap-southeast-1.compute.amazonaws.com:8080/llm-analyzer';
+            $llmResponse = Http::timeout(40)->post($llmAPI, [
                 'context' => [
+                    'url' => $url,
                     'input_type' => 'url',
                     'prediction' => $data['prediction'] ?? '',
                     'confidence' => $data['confidence'] ?? 0,
