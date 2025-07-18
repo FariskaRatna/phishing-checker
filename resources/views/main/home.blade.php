@@ -215,7 +215,7 @@
                     @foreach ($dataurl as $url)
                     @php
                     // Tentukan status dan warna berdasarkan confidence
-                    if ($url->prediction == 'safe' || $url->confidence >= 70) {
+                    if ($url->prediction == 'legitimate' || $url->confidence >= 70) {
                     $status = 'Terverifikasi Aman';
                     $badgeColor = '#0d6efd'; // biru
                     $textColor = 'text-white';
