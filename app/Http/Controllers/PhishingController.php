@@ -427,6 +427,7 @@ class PhishingController extends Controller
                     'input_type' => 'url',
                     'prediction' => $data['prediction'] ?? '',
                     'confidence' => $data['confidence'] ?? 0,
+                    'final_prediction' => $data['final_prediction'],
                     'trusted_domain' => $isTrusted,
                     'extracted_content' => $data['extracted_content'] ?? []
                 ]
