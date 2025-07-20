@@ -28,7 +28,7 @@
       <!-- Image -->
       <div class="col-md-5 text-center mb-4 mb-md-0">
 
-        <img src="{{ asset('images/bumatara-shadow1.png') }}" class="img-fluid rounded "
+        <img src="{{ asset('images/bum-logo-bw.png') }}" class="img-fluid rounded "
           alt="Ilustrasi Deteksi Phishing" style="width:200px; " />
       </div>
       <!-- Text -->
