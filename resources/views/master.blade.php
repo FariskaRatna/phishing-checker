@@ -409,7 +409,16 @@
         });
     </script>
     @endif
-
+    @if (session('success'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            handleResponse({
+                status: "success",
+                message: "{{ session('success') }}"
+            });
+        });
+    </script>
+    @endif
 
 
 </body>

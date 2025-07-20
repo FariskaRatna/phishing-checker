@@ -5,6 +5,7 @@
 <!-- Hero Section -->
 <section class="hero">
     <h2 class="mb-3">🔍 DMARC</h2>
+
     <p>Domain-based Message Authentication, Reporting, and Conformance</p>
 
     <h1 class="display-5 fw-bold">Phishing URL checker</h1>
@@ -295,7 +296,7 @@
 </div>
 
 
-<!-- Modal -->
+<!-- Modal Analisis Link -->
 <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -310,7 +311,9 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="switchToFeedback">
+                    Tutup & Buka Feedback
+                </button>
             </div>
 
         </div>
@@ -376,7 +379,148 @@
     </div>
 </div>
 
+<!-- Modal How To Use -->
+<div class="modal fade" id="howToUseModal" tabindex="-1" aria-labelledby="howToUseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="howToUseModalLabel">Tata Cara Menggunakan Fitur Check Phishing</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li>Masuk ke menu utama aplikasi.</li>
+                    <li>Isikan link yang ingin diperiksa pada kolom <strong>"Check Link"</strong>.</li>
+                    <li>Tekan tombol <strong>"Scan Link"</strong> untuk memulai pemeriksaan.</li>
+                    <li>Pastikan kuota cek Anda tersedia.</li>
+                    <li>Tunggu respon dari sistem beberapa saat.</li>
+                    <li>Hasil deteksi akan tampil secara otomatis di layar.</li>
+                </ol>
+                <p class="mt-3 text-muted"><small>Pastikan koneksi internet stabil untuk hasil terbaik.</small></p>
+            </div>
+            <div class="modal-footer">
 
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="switchToFeedback">
+                    Tutup & Buka Feedback
+                </button> -->
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Mengerti</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Survei -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('survey.store') }}">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="surveyModalLabel">Survei Pengalaman Pengguna</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Mohon isi survei singkat ini untuk membantu kami meningkatkan layanan:</p>
+
+                    <!-- Nama -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Nama Anda">
+                    </div>
+
+                    <!-- Rentang Usia -->
+                    <div class="mb-3">
+                        <label for="age_range" class="form-label">Rentang Usia</label>
+                        <select class="form-select" id="age_range" name="age_range" required>
+                            <option value="" disabled selected>Pilih rentang usia</option>
+                            <option value="17-25">17-25 tahun</option>
+                            <option value="26-35">26-35 tahun</option>
+                            <option value="36-45">36-45 tahun</option>
+                            <option value="46+">46 tahun ke atas</option>
+                        </select>
+                    </div>
+
+                    <!-- Pertanyaan 1 -->
+                    <div class="mb-3">
+                        <label class="form-label">1. Seberapa mudah fitur ini digunakan?</label>
+                        <select class="form-select" name="q1" required>
+                            <option value="" disabled selected>Pilih jawaban</option>
+                            <option value="5">Sangat Mudah</option>
+                            <option value="4">Mudah</option>
+                            <option value="3">Cukup</option>
+                            <option value="2">Sulit</option>
+                            <option value="1">Sangat Sulit</option>
+                        </select>
+                    </div>
+
+                    <!-- Pertanyaan 2 -->
+                    <div class="mb-3">
+                        <label class="form-label">2. Apakah hasil deteksi sudah sesuai harapan Anda?</label>
+                        <select class="form-select" name="q2" required>
+                            <option value="" disabled selected>Pilih jawaban</option>
+                            <option value="5">Sangat Sesuai</option>
+                            <option value="4">Sesuai</option>
+                            <option value="3">Cukup</option>
+                            <option value="2">Kurang Sesuai</option>
+                            <option value="1">Tidak Sesuai</option>
+                        </select>
+                    </div>
+
+                    <!-- Pertanyaan 3 -->
+                    <div class="mb-3">
+                        <label class="form-label">3. Seberapa cepat respon sistem?</label>
+                        <select class="form-select" name="q3" required>
+                            <option value="" disabled selected>Pilih jawaban</option>
+                            <option value="5">Sangat Cepat</option>
+                            <option value="4">Cepat</option>
+                            <option value="3">Cukup Cepat</option>
+                            <option value="2">Lambat</option>
+                            <option value="1">Sangat Lambat</option>
+                        </select>
+                    </div>
+
+                    <!-- Pertanyaan 4 -->
+                    <div class="mb-3">
+                        <label class="form-label">4. Apakah Anda merasa fitur ini bermanfaat?</label>
+                        <select class="form-select" name="q4" required>
+                            <option value="" disabled selected>Pilih jawaban</option>
+                            <option value="5">Sangat Bermanfaat</option>
+                            <option value="4">Bermanfaat</option>
+                            <option value="3">Cukup</option>
+                            <option value="2">Kurang Bermanfaat</option>
+                            <option value="1">Tidak Bermanfaat</option>
+                        </select>
+                    </div>
+
+                    <!-- Pertanyaan 5 -->
+                    <div class="mb-3">
+                        <label class="form-label">5. Seberapa besar kemungkinan Anda merekomendasikan fitur ini?</label>
+                        <select class="form-select" name="q5" required>
+                            <option value="" disabled selected>Pilih jawaban</option>
+                            <option value="5">Sangat Mungkin</option>
+                            <option value="4">Mungkin</option>
+                            <option value="3">Cukup</option>
+                            <option value="2">Tidak Mungkin</option>
+                            <option value="1">Sama Sekali Tidak</option>
+                        </select>
+                    </div>
+
+                    <!-- Kritik & Saran -->
+                    <div class="mb-3">
+                        <label for="feedback" class="form-label">Kritik & Saran</label>
+                        <textarea class="form-control" id="feedback" name="feedback" rows="3"
+                            placeholder="Tulis saran Anda di sini..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success w-100">Kirim Survei</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -394,6 +538,33 @@
             errorModal.show();
         }
     };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var howToUseModal = new bootstrap.Modal(document.getElementById('howToUseModal'));
+            howToUseModal.show();
+        }, 5000); // delay 10 detik (10.000 ms)
+    });
+
+
+    document.getElementById('switchToFeedback').addEventListener('click', function() {
+        // Ambil instance modal resultModal
+        var resultModalEl = document.getElementById('resultModal');
+        var resultModal = bootstrap.Modal.getInstance(resultModalEl);
+
+        // Tutup resultModal
+        resultModal.hide();
+
+        // Saat resultModal sudah tertutup, buka feedbackModal
+        resultModalEl.addEventListener('hidden.bs.modal', function handler() {
+            // Hapus event listener supaya tidak berulang
+            resultModalEl.removeEventListener('hidden.bs.modal', handler);
+
+            // Buka feedbackModal
+            var feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+            feedbackModal.show();
+        });
+    });
 </script>
 
 @endpush
