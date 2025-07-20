@@ -60,7 +60,7 @@ class PhishingController extends Controller
                 [$ip]
             ) ?? 0;
 
-            $quota = 5 - $quotaumum;
+            $quota = 50 - $quotaumum;
         }
 
 
@@ -280,13 +280,12 @@ class PhishingController extends Controller
                 }
 
                 $phishing->update(['llm_analysis' => $llmAnalysis]);
-                
+
                 $data['llm_analysis'] = $llmAnalysis;
                 $data['final_prediction'] = $finalPrediction;
                 $data['final_confidence'] = $finalConfidence;
 
                 return response()->json($data);
-                
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Gagal mengirim permintaan ke Flask API Email: ' . $e->getMessage()], 500);
             }
