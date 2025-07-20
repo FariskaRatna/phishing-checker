@@ -4,7 +4,7 @@
 
 <!-- Hero Section -->
 <section class="hero">
-    <h2 class="mb-3">🔍 DMARC</h2>
+    <h2 class="mb-3">🔍 DMARC Uji Pull</h2>
     <p>Domain-based Message Authentication, Reporting, and Conformance</p>
 
     <h1 class="display-5 fw-bold">Phishing URL checker</h1>
