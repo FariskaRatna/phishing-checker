@@ -188,7 +188,7 @@ class PhishingController extends Controller
             try {
                 Log::info('Mengirim permintaan ke Flask API Email', ['email' => $url]);
 
-                $response = Http::timeout(30)->post('CHANGE THIS', ['email' => $url]);
+                $response = Http::timeout(30)->post('http://ec2-3-27-72-35.ap-southeast-2.compute.amazonaws.com:8080/email-predict', ['email' => $url]);
 
                 if ($response->failed()) {
                     Log::error('Flask API Email gagal', [
@@ -252,7 +252,7 @@ class PhishingController extends Controller
                 // =================== EMAIL LLM SECTION ===================
                 $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
                 try {
-                    $llmAPI = 'CHANGE THIS';
+                    $llmAPI = 'http://ec2-3-27-72-35.ap-southeast-2.compute.amazonaws.com:8080/llm-analyzer';
                     $llmResponse = Http::timeout(40)->post($llmAPI, [
                         'context' => [
                             'input_type' => 'email',
@@ -305,7 +305,7 @@ class PhishingController extends Controller
             // Log the request
             Log::info('Sending request to Flask API', ['original_url' => $request->input('url'), 'normalized_url' => $url]);
 
-            $response = Http::timeout(30)->post('CHANGE THIS', ['url' => $url]);
+            $response = Http::timeout(30)->post('http://ec2-3-27-72-35.ap-southeast-2.compute.amazonaws.com:8080/url-predict', ['url' => $url]);
 
             // Log the raw response for debugging
             Log::info('Flask API Response', [
@@ -419,7 +419,7 @@ class PhishingController extends Controller
         // =================== URL LLM SECTION  ===================
         $llmAnalysis = 'Analisis LLM tidak tersedia atau gagal.';
         try {
-            $llmAPI = 'CHANGE THIS';
+            $llmAPI = 'http://ec2-3-27-72-35.ap-southeast-2.compute.amazonaws.com:8080/llm-analyzer';
             $llmResponse = Http::timeout(40)->post($llmAPI, [
                 'context' => [
                     'url' => $url,
